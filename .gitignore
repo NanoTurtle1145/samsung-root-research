@@ -1,0 +1,50 @@
+# ---- 大文件（>100MB 会被 GitHub 拒绝）----
+*.img
+*.img.lz4
+*.lz4
+*.elf
+*.ko
+# 无扩展名的原始内核镜像
+/01_固件内核/kernel_dzf2_raw
+devices_ports/**/kernel
+01_固件内核/boot.img
+
+# ---- 编译产物 / 二进制 ----
+*.so
+*.o
+*.a
+*.bin
+*.apk
+*.zip
+*.tar.gz
+*.tgz
+*.zst
+*.deb
+*.rpm
+*.xz
+02_exploit工程/pipe_test
+02_exploit工程/ksu_test
+02_exploit工程/fusion-s24u/build/
+
+# ---- 第三方工具提取物（版权/许可不明，不上传）----
+03_参考研究/coolapk免root工具/extracted/
+
+# ---- 旧版 App 源码备份（见 RootMyS9280 仓库）----
+07_发布物/rootmy_v1_backup/
+
+# ---- 工具链（体积大，不纳入版本控制）----
+06_工具链/
+
+# ---- 密钥 / 签名 ----
+*.keystore
+*.jks
+*.idsig
+
+# ---- 日志 / 临时 ----
+*.log
+*.tmp
+*.cache
+
+# ---- 系统文件 ----
+.DS_Store
+Thumbs.db

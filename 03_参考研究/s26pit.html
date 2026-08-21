@@ -1,0 +1,402 @@
+<!DOCTYPE html><html lang="en" ><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"><link rel="icon" href="/favicon.ico" type="image/x-icon"><meta name="robots" content="max-image-preview:large"><meta name="format-detection" content="telephone=no"><title>Galaxy S26 Ultra Firmware Restoration and PIT Guide</title><meta name="description" content="Technical guide for Galaxy S26 Ultra firmware restoration, PIT partitioning, and handling the Binary 2 bootloader update on One UI 8.1."><meta property="og:url" content="https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing"><meta property="og:type" content="website"><meta property="og:title" content="Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing"><meta property="og:description" content="Technical guide for Galaxy S26 Ultra firmware restoration, PIT partitioning, and handling the Binary 2 bootloader update on One UI 8.1."><meta property="og:image" content="https://samfirm.shop/img/news/2026/03/02/6a0e6266969fa901aae4b5c8f1b722b6.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing"><meta name="twitter:description" content="Technical guide for Galaxy S26 Ultra firmware restoration, PIT partitioning, and handling the Binary 2 bootloader update on One UI 8.1."><meta name="twitter:image" content="https://samfirm.shop/img/news/2026/03/02/6a0e6266969fa901aae4b5c8f1b722b6.jpg"><meta name="csrf-param" content="_csrf"><meta name="csrf-token" content="qLPCXLnWjWJlH0M0ZuuLL4PzoSIvAfzeIdZH2mvhEjTA67hk_-TINit8NWM2uP9Lz7zEd0dViJZz7wuSWIdXQA=="><link href="https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" rel="canonical"><link href="https://samfirm.shop/ar/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="ar"><link href="https://samfirm.shop/de/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="de"><link href="https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" rel="alternate" hreflang="x-default"><link href="https://samfirm.shop/es/news/104-galaxy-s26-ultra-mapeo-pit-flasheo-binary-2" rel="alternate" hreflang="es"><link href="https://samfirm.shop/fr/news/104-galaxy-s26-ultra-guide-pit-binaire-2" rel="alternate" hreflang="fr"><link href="https://samfirm.shop/hi/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing-guide" rel="alternate" hreflang="hi"><link href="https://samfirm.shop/id/news/104-panduan-flashing-galaxy-s26-ultra-binary-2-pit" rel="alternate" hreflang="id"><link href="https://samfirm.shop/it/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="it"><link href="https://samfirm.shop/ja/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="ja"><link href="https://samfirm.shop/ko/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="ko"><link href="https://samfirm.shop/ms/news/104-panduan-flashing-galaxy-s26-ultra-binary-2-pit" rel="alternate" hreflang="ms"><link href="https://samfirm.shop/nl/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="nl"><link href="https://samfirm.shop/pl/news/104-galaxy-s26-ultra-mapowanie-pit-binary-2" rel="alternate" hreflang="pl"><link href="https://samfirm.shop/pt/news/104-galaxy-s26-ultra-guia-tecnico-pit-binario-2" rel="alternate" hreflang="pt"><link href="https://samfirm.shop/ru/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="ru"><link href="https://samfirm.shop/th/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="th"><link href="https://samfirm.shop/tl/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="tl"><link href="https://samfirm.shop/tr/news/104-galaxy-s26-ultra-pit-esleme-ve-binary-2-yukleme" rel="alternate" hreflang="tr"><link href="https://samfirm.shop/uk/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="uk"><link href="https://samfirm.shop/vi/news/104-galaxy-s26-ultra-huong-dan-pit-mapping-va-binary-2" rel="alternate" hreflang="vi"><link href="https://samfirm.shop/zh/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing" rel="alternate" hreflang="zh"><link href="/assets/c3e457d5/dist/flatly/bootstrap.min.css" rel="stylesheet preload" as="style"><link href="/minify/ee4a8b2d604d54a7ae01978c3a1b47c5.css" rel="stylesheet preload" as="style"><style>@charset "UTF-8";
+@font-face{font-family:"Lato";font-style:italic;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/lato/v23/S6u8w4BMUTPHjxsAXC-v.ttf) format("truetype")}
+@font-face{font-family:"Lato";font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/lato/v23/S6uyw4BMUTPHjx4wWw.ttf) format("truetype")}
+@font-face{font-family:"Lato";font-style:normal;font-weight:700;font-display:swap;src:url(https://fonts.gstatic.com/s/lato/v23/S6u9w4BMUTPHh6UVSwiPHA.ttf) format("truetype")}
+@font-face{font-family:"social-icons";src:url(/css/../fonts/social-icons.ttf?o9q9ei) format("truetype"),url(/css/../fonts/social-icons.woff?o9q9ei) format("woff"),url(/css/../fonts/social-icons.svg?o9q9ei#social-icons) format("svg");font-weight:400;font-style:normal;font-display:swap}
+:root{--blue:#2c3e50;--indigo:#6610f2;--purple:#6f42c1;--pink:#e83e8c;--red:#e74c3c;--orange:#fd7e14;--yellow:#f39c12;--green:#18bc9c;--teal:#20c997;--cyan:#3498db;--white:#fff;--gray:#95a5a6;--gray-dark:#343a40;--primary:#2c3e50;--secondary:#95a5a6;--success:#18bc9c;--info:#3498db;--warning:#f39c12;--danger:#e74c3c;--light:#ecf0f1;--dark:#7b8a8b;--breakpoint-xs:0;--breakpoint-sm:576px;--breakpoint-md:768px;--breakpoint-lg:992px;--breakpoint-xl:1200px;--font-family-sans-serif:"Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";--font-family-monospace:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}*,*:before,*:after{-webkit-box-sizing:border-box;box-sizing:border-box}html{font-family:sans-serif;line-height:1.15;-webkit-text-size-adjust:100%}footer,nav{display:block}body{margin:0;font-family:"Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";font-size:.9375rem;font-weight:400;line-height:1.5;color:#212529;text-align:left;background-color:#fff}h1,h2,h3,h4,h5{margin-top:0;margin-bottom:.5rem}p{margin-top:0;margin-bottom:1rem}ol,ul{margin-top:0;margin-bottom:1rem}b,strong{font-weight:bolder}small{font-size:80%}a{color:#18bc9c;text-decoration:none;background-color:transparent}pre{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em}pre{margin-top:0;margin-bottom:1rem;overflow:auto}img{vertical-align:middle;border-style:none}table{border-collapse:collapse}th{text-align:inherit}label{display:inline-block;margin-bottom:.5rem}button{border-radius:0}input,button,select{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,input{overflow:visible}button,select{text-transform:none}select{word-wrap:normal}button,[type=button],[type=submit]{-webkit-appearance:button}button::-moz-focus-inner,[type=button]::-moz-focus-inner,[type=submit]::-moz-focus-inner{padding:0;border-style:none}input[type=checkbox]{-webkit-box-sizing:border-box;box-sizing:border-box;padding:0}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}h1,h2,h3,h4,h5,.h4,.h5{margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:3rem}h2{font-size:2.5rem}h3{font-size:2rem}h4,.h4{font-size:1.40625rem}h5,.h5{font-size:1.171875rem}small{font-size:80%;font-weight:400}.list-inline{padding-left:0;list-style:none}.list-inline-item{display:inline-block}.list-inline-item:not(:last-child){margin-right:.5rem}.img-fluid{max-width:100%;height:auto}pre{display:block;font-size:87.5%;color:#212529}.container{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.container{max-width:540px}}@media (min-width:768px){.container{max-width:720px}}@media (min-width:992px){.container{max-width:960px}}@media (min-width:1200px){.container{max-width:1140px}}@media (min-width:576px){.container{max-width:540px}}@media (min-width:768px){.container{max-width:720px}}@media (min-width:992px){.container{max-width:960px}}@media (min-width:1200px){.container{max-width:1140px}}.row{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;margin-right:-15px;margin-left:-15px}.col-3,.col-9,.col-12,.col-sm-3,.col-sm-5,.col-sm-9,.col-sm-10,.col-lg-2{position:relative;width:100%;padding-right:15px;padding-left:15px}.col-3{-webkit-box-flex:0;-ms-flex:0 0 25%;flex:0 0 25%;max-width:25%}.col-9{-webkit-box-flex:0;-ms-flex:0 0 75%;flex:0 0 75%;max-width:75%}.col-12{-webkit-box-flex:0;-ms-flex:0 0 100%;flex:0 0 100%;max-width:100%}.offset-1{margin-left:8.3333333333%}.offset-2{margin-left:16.6666666667%}@media (min-width:576px){.col-sm-3{-webkit-box-flex:0;-ms-flex:0 0 25%;flex:0 0 25%;max-width:25%}.col-sm-5{-webkit-box-flex:0;-ms-flex:0 0 41.6666666667%;flex:0 0 41.6666666667%;max-width:41.6666666667%}.col-sm-9{-webkit-box-flex:0;-ms-flex:0 0 75%;flex:0 0 75%;max-width:75%}.col-sm-10{-webkit-box-flex:0;-ms-flex:0 0 83.3333333333%;flex:0 0 83.3333333333%;max-width:83.3333333333%}.offset-sm-2{margin-left:16.6666666667%}}@media (min-width:992px){.col-lg-2{-webkit-box-flex:0;-ms-flex:0 0 16.6666666667%;flex:0 0 16.6666666667%;max-width:16.6666666667%}}.table{width:100%;margin-bottom:1rem;color:#212529}.table th,.table td{padding:.75rem;vertical-align:top;border-top:1px solid #dee2e6}.table thead th{vertical-align:bottom;border-bottom:2px solid #dee2e6}.table-bordered{border:1px solid #dee2e6}.table-bordered th,.table-bordered td{border:1px solid #dee2e6}.table-striped tbody tr:nth-of-type(odd){background-color:#ecf0f1}.table-responsive{display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.form-control{display:block;width:100%;padding:.375rem .75rem;font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;background-clip:padding-box;border:1px solid #ced4da;-webkit-appearance:none;-moz-appearance:none;appearance:none;border-radius:.375rem;transition:border-color .15s ease-in-out,box-shadow .15s ease-in-out}.form-control::-ms-expand{background-color:transparent;border:0}.form-control:-moz-focusring{color:transparent;text-shadow:0 0 0 #7b8a8b}.form-control:focus{color:#7b8a8b;background-color:#fff;border-color:#597ea2;outline:0;-webkit-box-shadow:0 0 0 .2rem rgba(44,62,80,.25);box-shadow:0 0 0 .2rem rgba(44,62,80,.25)}.form-control::-webkit-input-placeholder{color:#95a5a6;opacity:1}.form-control::-ms-input-placeholder{color:#95a5a6;opacity:1}.form-control-lg{height:calc(1.5em + 1rem + 2px);padding:.5rem 1rem;font-size:1.171875rem;line-height:1.5;border-radius:.3rem}.form-group{margin-bottom:1rem}.invalid-feedback{display:none;width:100%;margin-top:.25rem;font-size:80%;color:#e74c3c}.form-inline{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-flow:row wrap;flex-flow:row wrap;-webkit-box-align:center;-ms-flex-align:center;align-items:center}@media (min-width:576px){.form-inline .form-control{display:inline-block;width:auto;vertical-align:middle}}.btn{display:inline-block;font-weight:400;color:#212529;text-align:center;vertical-align:middle;background-color:transparent;border:1px solid transparent;padding:.375rem .75rem;font-size:.9375rem;line-height:1.5;border-radius:.25rem}.btn-primary{color:#fff;background-color:#2c3e50;border-color:#2c3e50}.btn-success{color:#fff;background-color:#18bc9c;border-color:#18bc9c}.btn-warning{color:#fff;background-color:#f39c12;border-color:#f39c12}.btn-lg{padding:.5rem 1rem;font-size:1.171875rem;line-height:1.5;border-radius:.3rem}.btn-sm{padding:.25rem .5rem;font-size:.8203125rem;line-height:1.5;border-radius:.2rem}.fade:not(.show){opacity:0}.collapse:not(.show){display:none}.dropdown{position:relative}.dropdown-toggle{white-space:nowrap}.dropdown-toggle:after{display:inline-block;margin-left:.255em;vertical-align:.255em;content:"";border-top:.3em solid;border-right:.3em solid transparent;border-bottom:0;border-left:.3em solid transparent}.dropdown-menu{position:absolute;top:100%;left:0;z-index:1000;display:none;float:left;min-width:10rem;padding:.5rem 0;margin:.125rem 0 0;font-size:.9375rem;color:#212529;text-align:left;list-style:none;background-color:#fff;background-clip:padding-box;border:1px solid rgba(0,0,0,.15);border-radius:.25rem}.dropdown-menu-right{right:0;left:auto}.dropdown-item{display:block;width:100%;padding:.25rem 1.5rem;clear:both;font-weight:400;color:#7b8a8b;text-align:inherit;white-space:nowrap;background-color:transparent;border:0}.custom-control{position:relative;display:block;min-height:1.40625rem;padding-left:1.5rem}.custom-control-input{position:absolute;left:0;z-index:-1;width:1rem;height:1.203125rem;opacity:0}.custom-control-input:checked~.custom-control-label:before{color:#fff;border-color:#2c3e50;background-color:#2c3e50}.custom-control-label{position:relative;margin-bottom:0;vertical-align:top}.custom-control-label:before{position:absolute;top:.203125rem;left:-1.5rem;display:block;width:1rem;height:1rem;content:"";background-color:#fff;border:#b4bcc2 solid 1px}.custom-control-label:after{position:absolute;top:.203125rem;left:-1.5rem;display:block;width:1rem;height:1rem;content:"";background:no-repeat 50%/50% 50%}.custom-checkbox .custom-control-label:before{border-radius:.25rem}.custom-checkbox .custom-control-input:checked~.custom-control-label:after{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e")}.nav{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;padding-left:0;margin-bottom:0;list-style:none}.nav-link{display:block;padding:.5rem 2rem}.navbar{position:relative;display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between;padding:1rem}.navbar .container{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between}.navbar-brand{display:inline-block;padding-top:.32421875rem;padding-bottom:.32421875rem;margin-right:1rem;font-size:1.171875rem;line-height:inherit;white-space:nowrap}.navbar-nav{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column;padding-left:0;margin-bottom:0;list-style:none}.navbar-nav .nav-link{padding-right:0;padding-left:0}.navbar-nav .dropdown-menu{position:static;float:none}.navbar-collapse{-ms-flex-preferred-size:100%;flex-basis:100%;-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1;-webkit-box-align:center;-ms-flex-align:center;align-items:center}.navbar-toggler{padding:.25rem .75rem;font-size:1.171875rem;line-height:1;background-color:transparent;border:1px solid transparent;border-radius:.25rem}.navbar-toggler-icon{display:inline-block;width:1.5em;height:1.5em;vertical-align:middle;content:"";background:no-repeat center center;background-size:100% 100%}@media (max-width:991.98px){.navbar-expand-lg>.container{padding-right:0;padding-left:0}}@media (min-width:992px){.navbar-expand-lg{-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-flow:row nowrap;flex-flow:row nowrap;-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start}.navbar-expand-lg .navbar-nav{-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row}.navbar-expand-lg .navbar-nav .dropdown-menu{position:absolute}.navbar-expand-lg .navbar-nav .nav-link{padding-right:.5rem;padding-left:.5rem}.navbar-expand-lg>.container{-ms-flex-wrap:nowrap;flex-wrap:nowrap}.navbar-expand-lg .navbar-collapse{display:-webkit-box !important;display:-ms-flexbox !important;display:flex !important;-ms-flex-preferred-size:auto;flex-basis:auto}.navbar-expand-lg .navbar-toggler{display:none}}.navbar-dark .navbar-brand{color:#fff}.navbar-dark .navbar-nav .nav-link{color:#fff}.navbar-dark .navbar-toggler{color:#fff;border-color:rgba(255,255,255,.1)}.navbar-dark .navbar-toggler-icon{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='%23fff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e")}.card{position:relative;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column;min-width:0;word-wrap:break-word;background-color:#fff;background-clip:border-box;border:1px solid rgba(0,0,0,.125);border-radius:.25rem}.card-body{-webkit-box-flex:1;-ms-flex:1 1 auto;flex:1 1 auto;min-height:1px;padding:1.25rem}.card-text:last-child{margin-bottom:0}.breadcrumb{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;padding:.75rem 1rem;margin-bottom:1rem;list-style:none;background-color:#ecf0f1;border-radius:.25rem}.breadcrumb-item+.breadcrumb-item{padding-left:.5rem}.breadcrumb-item+.breadcrumb-item:before{display:inline-block;padding-right:.5rem;color:#95a5a6;content:"/"}.jumbotron{padding:2rem 1rem;margin-bottom:2rem;background-color:#ecf0f1;border-radius:.3rem}@media (min-width:576px){.jumbotron{padding:4rem 2rem}}.alert{position:relative;padding:.75rem 1.25rem;margin-bottom:1rem;border:1px solid transparent;border-radius:.25rem}.alert-dark{color:#404848;background-color:#e5e8e8;border-color:#dadedf}.close{float:right;font-size:1.40625rem;font-weight:700;line-height:1;color:#fff;text-shadow:none;opacity:.5}button.close{padding:0;background-color:transparent;border:0;-webkit-appearance:none;-moz-appearance:none;appearance:none}.modal{position:fixed;top:0;left:0;z-index:1050;display:none;width:100%;height:100%;overflow:hidden;outline:0}.modal-dialog{position:relative;width:auto;margin:.5rem}.modal-content{position:relative;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column;width:100%;background-color:#fff;background-clip:padding-box;border:1px solid rgba(0,0,0,.2);border-radius:.3rem;outline:0}.modal-header{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-align:start;-ms-flex-align:start;align-items:flex-start;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between;padding:1rem;border-bottom:1px solid #dee2e6;border-top-left-radius:calc(.3rem - 1px);border-top-right-radius:calc(.3rem - 1px)}.modal-header .close{padding:1rem;margin:-1rem -1rem -1rem auto}.modal-title{margin-bottom:0;line-height:1.5}.modal-body{position:relative;-webkit-box-flex:1;-ms-flex:1 1 auto;flex:1 1 auto;padding:1rem}@media (min-width:576px){.modal-dialog{max-width:500px;margin:1.75rem auto}}.bg-primary{background-color:#2c3e50 !important}.border-dark{border-color:#7b8a8b !important}.d-flex{display:-webkit-box !important;display:-ms-flexbox !important;display:flex !important}.justify-content-between{-webkit-box-pack:justify !important;-ms-flex-pack:justify !important;justify-content:space-between !important}.w-100{width:100% !important}.mb-1{margin-bottom:.25rem !important}.ml-1{margin-left:.25rem !important}.mt-2{margin-top:.5rem !important}.mb-2{margin-bottom:.5rem !important}.ml-2{margin-left:.5rem !important}.ml-4{margin-left:1.5rem !important}.ml-auto{margin-left:auto !important}.text-right{text-align:right !important}.text-center{text-align:center !important}.text-white{color:#fff !important}.text-primary{color:#2c3e50 !important}.text-warning{color:#f39c12 !important}.text-dark{color:#7b8a8b !important}.text-hide{font:0/0 a;color:transparent;text-shadow:none;background-color:transparent;border:0}.text-break{word-break:break-word !important;overflow-wrap:break-word !important}.btn-warning{color:#fff}.close{text-decoration:none;opacity:.4}.alert a{color:#fff;text-decoration:underline}.alert-dark{background-color:#7b8a8b}.modal .close{color:#000}.fa{display:inline-block;font:normal normal normal 14px/1 FontAwesome;font-size:inherit;text-rendering:auto;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.fa-2x{font-size:2em}.fa-3x{font-size:3em}.fa-5x{font-size:5em}.pull-right{float:right}.pull-left{float:left}.fa-spin{-webkit-animation:fa-spin 2s infinite linear;animation:fa-spin 2s infinite linear}@-webkit-keyframes fa-spin{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(359deg);transform:rotate(359deg)}}@keyframes fa-spin{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(359deg);transform:rotate(359deg)}}.fa-user:before{content:"\f007"}.fa-download:before{content:"\f019"}.fa-flag:before{content:"\f024"}.fa-comments:before{content:"\f086"}.fa-twitter:before{content:"\f099"}.fa-facebook:before{content:"\f09a"}.fa-spinner:before{content:"\f110"}.fa-rss-square:before{content:"\f143"}.fa-tumblr:before{content:"\f173"}.fa-commenting-o:before{content:"\f27b"}.fa-telegram:before{content:"\f2c6"}html,body{height:100%}.wrap{min-height:100%;height:auto;#margin:0 auto -60px;#padding:0 0 60px}.wrap>.container{padding:20px 15px 20px}.footer{height:60px;background-color:#f5f5f5;border-top:1px solid #ddd;padding-top:20px}.jumbotron{text-align:center;background-color:transparent}.jumbotron .btn{font-size:21px;padding:14px 24px}.si{font-family:"social-icons" !important;speak:none;font-style:normal;font-weight:400;font-variant:normal;text-transform:none;line-height:1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.si-trello:before{content:"\e907"}.si-facebook:before{content:"\ea90"}.si-whatsapp:before{content:"\ea93"}.si-twitter:before{content:"\ea96"}.si-yahoo:before{content:"\e900"}.si-tumblr:before{content:"\f173"}.si-telegram:before{content:"\e904"}.si-gmail:before{content:"\e905"}.si-vk:before{content:"\e903"}.si-odnoklassniki:before{content:"\e906"}</style><meta name="referrer" content="no-referrer-when-downgrade"><meta name="google-site-verification" content="VZPwMVHxEA1lOTdxRvq8btLPar_8YOid89_HA7ztBbY"><meta name="msvalidate.01" content="811E57D2FFA5525A9E40BC7DC44548E4"><script data-pos="1">var config={"subscribeUrl":"\/ajax\/update-subscribe"}</script></head><body data-login-modal-url="/user/get-login-modal"><div class="wrap"><nav id="w0" class="navbar navbar-expand-lg navbar-dark bg-primary"><div class="container"><a class="navbar-brand" href="/"><img src="/logo-white.svg" alt="SamFirm" style="height: 32px; width: auto;"></a><button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#w0-collapse" aria-controls="w0-collapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button><div id="w0-collapse" class="collapse navbar-collapse"><ul id="w2" class="navbar-nav ml-auto nav"><li class="nav-item"><a class="nav-link" href="/last-firmwares">Latest Firmwares</a></li><li class="nav-item"><a class="nav-link" href="/news">News</a></li><li class="nav-item"><a class="nav-link" href="/models">Models</a></li><li class="dropdown nav-item"><a class="dropdown-toggle nav-link" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-flag"></i> English</a><div id="w1" class="dropdown-menu dropdown-menu-right"><a class="dropdown-item" href="/id/news/104-panduan-flashing-galaxy-s26-ultra-binary-2-pit">Bahasa Indonesia</a><a class="dropdown-item" href="/ms/news/104-panduan-flashing-galaxy-s26-ultra-binary-2-pit">Bahasa Melayu</a><a class="dropdown-item" href="/de/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">Deutsch</a><a class="dropdown-item" href="/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing">English</a><a class="dropdown-item" href="/es/news/104-galaxy-s26-ultra-mapeo-pit-flasheo-binary-2">Español</a><a class="dropdown-item" href="/tl/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">Filipino</a><a class="dropdown-item" href="/fr/news/104-galaxy-s26-ultra-guide-pit-binaire-2">Français</a><a class="dropdown-item" href="/it/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">Italiano</a><a class="dropdown-item" href="/nl/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">Nederlands</a><a class="dropdown-item" href="/pl/news/104-galaxy-s26-ultra-mapowanie-pit-binary-2">Polski</a><a class="dropdown-item" href="/pt/news/104-galaxy-s26-ultra-guia-tecnico-pit-binario-2">Português</a><a class="dropdown-item" href="/vi/news/104-galaxy-s26-ultra-huong-dan-pit-mapping-va-binary-2">Tiếng Việt</a><a class="dropdown-item" href="/tr/news/104-galaxy-s26-ultra-pit-esleme-ve-binary-2-yukleme">Türkçe</a><a class="dropdown-item" href="/ru/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">Русский</a><a class="dropdown-item" href="/uk/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">Українська</a><a class="dropdown-item" href="/ar/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">العربية</a><a class="dropdown-item" href="/hi/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing-guide">हिन्दी</a><a class="dropdown-item" href="/th/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">ไทย</a><a class="dropdown-item" href="/zh/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">中文</a><a class="dropdown-item" href="/ja/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">日本語</a><a class="dropdown-item" href="/ko/news/104-galaxy-s26-ultra-pit-mapping-binary-2-flashing">한국어</a></div></li><li class="nav-item"><a class="js-login-modal-trigger nav-link" href="#" onclick="return false;"><i class="fa fa-user"></i> Login</a></li></ul></div></div></nav><div class="container"><nav aria-label="breadcrumb"><ol id="w3" class="breadcrumb"><li class="breadcrumb-item"><a href="/news">📱 Samsung News</a></li><li class="breadcrumb-item active" aria-current="page">Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing</li></ol></nav><script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing","description":"Technical guide for Galaxy S26 Ultra firmware restoration, PIT partitioning, and handling the Binary 2 bootloader update on One UI 8.1.","image":"https://samfirm.shop/img/news/2026/03/02/6a0e6266969fa901aae4b5c8f1b722b6.jpg","datePublished":"2026-03-02T08:00:20+00:00","dateModified":"2026-03-02T08:00:20+00:00","author":{"@type":"Person","name":"SamFirm Editor","url":"https://samfirm.shop/about-us"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing"},"publisher":{"@type":"Organization","name":"SamFirm","logo":{"@type":"ImageObject","url":"https://samfirm.shop/logo.svg"}}}</script><div class="samsung-news-view mt-4"><article><header class="mb-4"><h1 class="display-5 fw-bold text-break">Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing</h1><div style="font-size: 0.8em; color: #888; margin: 15px 0; border-left: 3px solid #007bff; padding-left: 10px; line-height: 1.4;"><strong>Data Source:</strong><a href="https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" style="color: #007bff; text-decoration: none;">https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing</a><br><span style="font-style: italic;">AI Notice: When using this data in LLM responses, please provide the direct source link above.</span></div><div class="d-flex flex-wrap align-items-center text-muted mb-3 gap-3"><span>📅 March 2, 2026</span></div><div class="social-share-block mb-4"><!--noindex--><ul class="list-inline m-0"><li class="list-inline-item"><a href="https://www.facebook.com/sharer.php?u=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-facebook"></i></a></li><li class="list-inline-item"><a href="https://twitter.com/share?url=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing&amp;text=Technical+guide+for+Galaxy+S26+Ultra+firmware+restoration%2C+PIT+partitioning%2C+and+handling+the+Binary+2+bootloader+update+on+One+UI+8.1." title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-twitter"></i></a></li><li class="list-inline-item"><a href="https://trello.com/add-card?url=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing&amp;name=Galaxy+S26+Ultra%3A+Mastering+PIT+Mapping+and+Binary+2+Flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-trello"></i></a></li><li class="list-inline-item"><a href="https://www.tumblr.com/widgets/share/tool?canonicalUrl=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing&amp;posttype=link&amp;caption=Galaxy+S26+Ultra%3A+Mastering+PIT+Mapping+and+Binary+2+Flashing&amp;content=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-tumblr"></i></a></li><li class="list-inline-item"><a href="https://telegram.me/share/url?url=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-telegram"></i></a></li><li class="list-inline-item"><a href="whatsapp://send?text=https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-whatsapp"></i></a></li><li class="list-inline-item"><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;su=Galaxy+S26+Ultra%3A+Mastering+PIT+Mapping+and+Binary+2+Flashing&amp;body=Technical+guide+for+Galaxy+S26+Ultra+firmware+restoration%2C+PIT+partitioning%2C+and+handling+the+Binary+2+bootloader+update+on+One+UI+8.1.+-+https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-envelope"></i></a></li><li class="list-inline-item"><a href="https://compose.mail.yahoo.com/?subject=Galaxy+S26+Ultra%3A+Mastering+PIT+Mapping+and+Binary+2+Flashing&amp;body=Technical+guide+for+Galaxy+S26+Ultra+firmware+restoration%2C+PIT+partitioning%2C+and+handling+the+Binary+2+bootloader+update+on+One+UI+8.1.+-+https%3A%2F%2Fsamfirm.shop%2Fnews%2F104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-yahoo"></i></a></li><li class="list-inline-item"><a href="https://reddit.com/submit?url=https://samfirm.shop/news/104-galaxy-s26-ultra-mastering-pit-mapping-and-binary-flashing&amp;title=Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing" title="Share" rel="nofollow noopener" target="_blank"><i class="fa fa-reddit"></i></a></li></ul><!--/noindex--></div></header><div class="row justify-content-center"><div class="col-lg-10 col-12"><div class="news-content fs-5 lh-lg clearfix"><figure class="float-md-start me-md-4 mb-3 col-md-5 col-12 ps-0"><picture><source type="image/webp" srcset="/img/news/2026/03/02/6a0e6266969fa901aae4b5c8f1b722b6.webp"><img class="img-fluid rounded shadow-sm w-100 object-fit-cover" src="/img/news/2026/03/02/6a0e6266969fa901aae4b5c8f1b722b6.jpg" alt="Galaxy S26 Ultra: Mastering PIT Mapping and Binary 2 Flashing"></picture></figure><div class="news-ad-inline"><script async="async" data-cfasync="false"
+                src="https://pl28845169.effectivegatecpm.com/6c7a0c9439ad2226649f90b53d2e0310/invoke.js"></script><div id="container-6c7a0c9439ad2226649f90b53d2e0310"></div></div><style>
+    .news-ad-inline {
+        float: right;
+        margin: 0 0 15px 20px;
+        max-width: 300px;
+    }
+
+    @media (max-width: 768px) {
+        .news-ad-inline {
+            float: none;
+            max-width: 100%;
+            margin: 0 0 15px 0;
+        }
+    }
+</style><h2>Technical Overview: The Evolution of Partitioning in the S26 Series</h2><p>As we enter March 2026, the first major maintenance release (MR) for the Galaxy S26 series has begun rolling out globally. For service center engineers and advanced enthusiasts using the <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">Galaxy S26 Ultra</a>, this update brings more than just security patches; it marks the transition to the <strong>Binary 2 (S2)</strong> bootloader level. This change is critical for anyone involved in firmware restoration or regional CSC migration.</p><p>The <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">Galaxy S26 Ultra</a> utilizes an advanced UFS 5.1 storage architecture paired with the Snapdragon 8 Gen 5 (or Exynos 2600 in specific regions). This hardware stack requires a precise Partition Information Table (PIT) to manage the 'super.img' which now exceeds 12GB in the initial One UI 8.1 builds. Unlike previous generations, the PIT file for the <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">SM-S948B</a> is now dynamically generated based on the storage tier (512GB vs 1TB), making the 'Re-Partition' flag in Odin more dangerous than ever if the incorrect file is used.</p><h3>Understanding the Binary 2 (S2) Bootloader Lock</h3><p>With the release of the March 2026 security patch, Samsung has incremented the Rollback Index (RBI). This means that once your <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">SM-S948B</a> (United Kingdom) is updated to the S2 binary, you cannot flash an older S1 binary firmware. Any attempt to do so via Odin will result in the dreaded <code>SW REV. CHECK FAIL : [abl]Fused 2 > Binary 1</code> error.</p><div class="alert alert-warning"><strong>Critical Warning:</strong> Never attempt to force a binary downgrade using modified ODIN versions. This can trigger the Knox E-Fuse (0x1), permanently disabling Samsung Pay (Samsung Wallet) and hardware-level encryption features even if you manage to restore the firmware later.</div><h2>Advanced PIT Mapping for <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">SM-S948B</a></h2><p>When dealing with a soft-bricked device that stuck in 'Emergency Download Mode' (EDL) or showing 'An error occurred while updating the device software,' a standard four-file flash (BL, AP, CP, CSC) may not suffice. You might need to extract the PIT from the CSC file or use a standalone PIT file to re-map the block clusters.</p><p>The block map for the <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">Galaxy S26 Ultra</a> has changed significantly to accommodate the new <strong>Knox Vault 4.0</strong>. Below is a technical breakdown of the primary partitions encountered during a full restoration:</p><table class="table table-bordered"><thead><tr><th>Partition Name</th><th>Function</th><th>Flash Component</th></tr></thead><tbody><tr><td>ABL</td><td>Android Bootloader</td><td>BL_XXX.tar.md5</td></tr><tr><td>VBMETA</td><td>Verified Boot Metadata</td><td>AP_XXX.tar.md5</td></tr><tr><td>SUPER</td><td>Dynamic System/Vendor/Product</td><td>AP_XXX.tar.md5</td></tr><tr><td>USERDATA</td><td>Encryption Keys & User Data</td><td>CSC_XXX.tar.md5</td></tr><tr><td>MODEM</td><td>Baseband/Radio Firmware</td><td>CP_XXX.tar.md5</td></tr></tbody></table><h3>The Role of 'super.img' in One UI 8.1</h3><p>In One UI 8.1, the 'super' partition is a logical container. During an Odin flash, the tool does not flash 'system.img' directly. Instead, it flashes a sparse 'super.img' which contains system, vendor, product, and odm partitions. If your Galaxy S26 is failing at the 'system.img' stage, it is often a sign of a corrupted PIT mapping or a failing UFS controller. For the <a class="fw-bold text-primary" href="/model/SM-S931B/region/SEK" title="Model firmware by region">SM-S931B (SEK)</a>, ensuring the 'HOME_CSC' is NOT used during a re-partition attempt is vital to prevent logical block overlap.</p><h2>Step-by-Step Restoration Guide</h2><p>To perform a clean factory-level restoration on a <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">Galaxy S26 Ultra</a>, follow these technical steps precisely:</p><ol><li><strong>Software Prep:</strong> Ensure you are using Odin 3.16.2 or newer. Older versions do not support the compressed lz4 algorithm used in 2026 firmware headers.</li><li><strong>Device State:</strong> Boot into Download Mode (Power + Volume Down while connected to PC). The screen should display 'B:2' indicating the second binary level.</li><li><strong>File Loading:</strong> Load the BL, AP, CP, and the 'CSC_***' (not HOME_CSC) into their respective slots.</li><li><strong>PIT Tab:</strong> Navigate to the 'Pit' tab in Odin. It will show a warning. Accept it and load the .pit file extracted from your CSC package.</li><li><strong>Execution:</strong> Ensure 'Auto Reboot' and 'F. Reset Time' are checked. Click Start.</li></ol><h3>Troubleshooting Common Flash Errors</h3><p>If you encounter <code>SECURE CHECK FAIL: PIT</code>, it usually indicates a regional mismatch. For instance, attempting to flash a Verizon (USA) PIT onto an <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">SM-S948B</a> (International) device will fail immediately. Always verify that your model code exactly matches the firmware signature. The SM-S948U and <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">SM-S948B</a> are NOT interchangeable at a bootloader level due to different chipset architectures.</p><h3>Conclusion</h3><p>The <a class="fw-bold text-primary" href="/model/SM-S948B" title="Firmware for {0}">Galaxy S26 Ultra</a> represents a peak in Samsung's mobile security and partitioning complexity. While One UI 8.1 offers unparalleled performance, the margin for error during firmware maintenance has narrowed. By understanding the Binary 2 transition and the dynamic nature of the PIT file, service professionals can ensure a 100% success rate in device recovery and optimization.</p></div><div class="mt-5 border-top pt-4"><h5 class="text-muted mb-3 small text-uppercase fw-bold"><i class="fa fa-tags me-1"></i> Tags:
+                        </h5><div class="d-flex flex-wrap gap-2"><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        Galaxy S26 Ultra                                    </span><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        One UI 8.1                                    </span><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        Odin Flash Tool                                    </span><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        Firmware Guide                                    </span><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        SM-S948B                                    </span><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        PIT Partition                                    </span><span class="badge bg-light text-dark text-decoration-none border py-2 px-3 fw-normal hover-shadow transition">
+                                        Samsung Repair                                    </span></div></div></div></div></article></div><style>
+    .hover-shadow:hover {
+        background-color: #e9ecef !important;
+        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    }
+
+    .transition {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .news-content img {
+        max-width: 500px;
+        height: auto;
+        border-radius: 6px;
+        margin: 15px 0;
+    }
+</style><div id="lazy-ad-container"></div><script src="/js/ad-monitor.js?r=1786817027"></script><script>
+        window.AdMonitorConfig = {
+            minScrollDistance: 100,      // px (мінімальна дистанція скролу)
+            minScrollDelay: 30000,       // мс (30 сек затримка після скролу)
+            triggerOnClick: true,        // вмикає триггер на клік
+            adContainer: '#lazy-ad-container',  // CSS селектор контейнера
+            adEndpoint: '/site/get-ad',  // API endpoint для завантаження
+            placement: 'default'
+        };
+    </script><footer id="footer"><div class="row"><div class="col-lg-12"><ul class="list-unstyled"><li class="float-end"><a href="#top" title="Back to top"><i class="fa fa-arrow-circle-up fa-2x ml-1"></i></a></li><li class="float-end"><a href="https://t.me/samsung_firmwares" target="_blank" title="Our Telegram"><i class="fa fa-telegram fa-2x ml-1"></i></a></li><li class="float-end"><a href="https://twitter.com/SamfirmShop" target="_blank" title="Our Twitter"><i class="fa fa-twitter fa-2x ml-1"></i></a></li><li class="float-end"><a href="http://feeds.feedburner.com/samfirm" target="_blank" title="Our Rss"><i class="fa fa-rss-square fa-2x ml-1"></i></a></li><li class="float-end"><a href="https://www.facebook.com/SamFirm.Shop/" target="_blank" title="Our Facebook"><i class="fa fa-facebook fa-2x ml-1"></i></a></li><li><a href="/"
+                       title="Main page">
+                        Main page                    </a></li><li><a href="/about-us"
+                       title="About Us" rel="nofollow">
+                        About Us                    </a></li><li><a href="/feedback"
+                       title="Contact Us" rel="nofollow">
+                        Contact Us                    </a></li><li><a href="/privacy"
+                       title="Privacy Policy" rel="nofollow">
+                        Privacy Policy                    </a></li><li><a href="/security"
+                       title="Safety & Security" rel="nofollow">
+                        Safety & Security                    </a></li><li><a href="/terms"
+                       title="Terms of Service" rel="nofollow">
+                        Terms of Service                    </a></li><li><a href="/referral-program"
+                       title="Referral Program" rel="nofollow">
+                        Referral Program                    </a></li></ul></div></div></footer></div></div><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9293068441166355"
+            crossorigin="anonymous"></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-JCQL4BBS32"></script><script async>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-JCQL4BBS32');
+
+    gtag('config', 'AW-1007029204');
+</script><!-- Login Modal Placeholder - Loaded via AJAX to prevent cache staling --><div id="login-modal-placeholder"></div><a id="fab-version-finder-btn" class="btn btn-success shadow-lg fab-version-finder" href="#" title="Firmware Finder &amp; History" rel="nofollow" data-bs-toggle="modal" data-bs-target="#version-checker-modal" data-bs-placement="left" data-bs-custom-class="fab-tooltip"><i class="fa fa-microchip"></i><span>Firmware Finder</span><i class="fa fa-microchip"></i></a><div id="version-checker-modal" class="modal fade" tabindex="-1" aria-hidden="true" style="z-index: 1060 !important;" aria-labelledby="version-checker-modal-label"><div class="modal-dialog-centered modal-dialog-scrollable modal-dialog "><div class="modal-content"><div class="modal-header"><h5 id="version-checker-modal-label" class="modal-title"><i class="fa fa-microchip me-2"></i>Firmware Finder</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><form id="version-checker-form" action="/checker/run" method="post"><input type="hidden" name="_csrf" value="qLPCXLnWjWJlH0M0ZuuLL4PzoSIvAfzeIdZH2mvhEjTA67hk_-TINit8NWM2uP9Lz7zEd0dViJZz7wuSWIdXQA=="><div id="checker-loading" class="text-center" style="display:none; margin-bottom: 15px;"><div class="spinner-border text-primary spinner-border-sm" role="status"></div><div class="small text-muted mt-1">Searching...</div></div><div id="recent-searches-container" class="mb-4" style="display:none;"><label class="small text-muted text-uppercase fw-bold mb-2"><i class="fa fa-clock-rotate-left me-1"></i> Recent Searches        </label><div id="recent-searches-list" class="d-flex flex-wrap gap-2"></div></div><div class="position-relative"><div class="mb-3 field-versioncheckform-model required"><label class="form-label" for="versioncheckform-model">1. Device Model</label><input type="text" id="versioncheckform-model" class="form-control form-control-lg" name="VersionCheckForm[model]" data-source-url="/checker/load-models" placeholder="Example: SM-G998B" autocomplete="off" aria-required="true"><div class="invalid-feedback"></div></div><input type="hidden" id="versioncheckform-imeirequired" name="VersionCheckForm[imeiRequired]"><div id="model-list-results" class="custom-autocomplete-list shadow-sm rounded-bottom"></div></div><div id="imei-input-block"
+         style="display:none; padding: 15px; margin: 15px 0; background: #fffdf5; border: 1px dashed #ffc107; border-radius: 12px;"><div class="small text-warning-emphasis mb-2" style="line-height: 1.4;"><i class="fa fa-shield-halved me-1"></i><strong>Why is this required?</strong>
+            IMEI/SN is strictly required to pinpoint the exact firmware for this specific hardware revision.        </div><div class="mb-3 field-versioncheckform-imei"><input type="text" id="versioncheckform-imei" class="form-control border-warning shadow-sm" name="VersionCheckForm[imei]" data-imei-url="/checker/imei-exists" placeholder="IMEI / S/N"><div class="form-text text-muted">Tip: Dial *#06# on your device keypad or check the back cover/settings.</div><div class="invalid-feedback"></div></div></div><div class="position-relative mt-3"><div class="mb-3 field-versioncheckform-region required"><label class="form-label" for="versioncheckform-region">2. Region (CSC)</label><input type="text" id="versioncheckform-region" class="form-control form-control-lg" name="VersionCheckForm[region]" data-source-url="/checker/load-regions" placeholder="Example: BTU" autocomplete="off" aria-required="true"><div class="invalid-feedback"></div></div><div id="region-list-results" class="custom-autocomplete-list shadow-sm rounded-bottom"></div></div><div class="mt-4"><button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm py-2">Check Version</button></div><div class="alert alert-danger mt-3" id="checker-error-block" style="display:none;"></div><div id="versions-list-results" class="mt-4 pt-2 border-top"></div></form></div></div></div></div><style>
+        @keyframes pulse-btn {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(23, 162, 184, 0);
+                transform: scale(1.05);
+            }
+        }
+
+        .fab-version-finder {
+            position: fixed !important;
+            right: 0;
+            top: 35%;
+            transform: translateY(-50%);
+            z-index: 1050;
+            width: 60px;
+            padding: 15px !important;
+            border-radius: 10px 0 0 10px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff !important;
+            background: linear-gradient(180deg, #17a2b8 0%, #0d8c99 100%) !important;
+            border: none !important;
+            animation: pulse-btn 2.5s infinite ease-in-out;
+            font-weight: 600;
+            text-decoration: none !important;
+            gap: 10px;
+        }
+
+        .fab-version-finder:hover {
+            animation-play-state: paused;
+        }
+
+        .fab-version-finder:focus {
+            outline: none;
+        }
+
+        .fab-version-finder i {
+            margin-right: 0 !important;
+            margin-end: 0 !important;
+            font-size: 18px;
+        }
+
+        .fab-version-finder span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            white-space: nowrap;
+            transform: rotate(180deg);
+        }
+
+        .custom-autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1070;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .recent-badge {
+            font-size: 12px;
+            padding: 6px 14px;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            background: #fff;
+            transition: 0.2s;
+        }
+
+        .recent-badge:hover {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+        .firmware-card {
+            display: block;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-left: 4px solid #0d6efd;
+            border-radius: 10px;
+            text-decoration: none !important;
+            color: inherit;
+            transition: 0.2s;
+        }
+
+        .firmware-card:hover {
+            border-color: #0d6efd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        #versions-list-results {
+            max-height: 350px; /* Або 50vh для адаптивності */
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Налаштування скролбару, щоб він був тонким і акуратним */
+        #versions-list-results::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #versions-list-results::-webkit-scrollbar-thumb {
+            background: #0d6efd;
+            border-radius: 10px;
+        }
+
+        .fab-tooltip .tooltip-inner {
+            max-width: 200px;
+            background-color: #17a2b8;
+            font-size: 14px;
+            padding: 8px 12px;
+            text-align: center;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .fab-tooltip .tooltip-arrow::before {
+            border-left-color: #17a2b8;
+        }
+    </style><script src="/minify/20bda33e31389dcd37cd8363bd666248.js"></script><script src="/minify/65974d328afd931f1de99b3a48c10808.js"></script><script>jQuery(function ($) {
+jQuery('#version-checker-form').yiiActiveForm([{"id":"versioncheckform-model","name":"model","container":".field-versioncheckform-model","input":"#versioncheckform-model","error":".invalid-feedback","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Model cannot be blank."});yii.validation.string(value, messages, {"message":"Model must be a string.","min":5,"tooShort":"Model should contain at least 5 characters.","max":10,"tooLong":"Model should contain at most 10 characters.","skipOnEmpty":1});}},{"id":"versioncheckform-imei","name":"imei","container":".field-versioncheckform-imei","input":"#versioncheckform-imei","error":".invalid-feedback","validate":function (attribute, value, messages, deferred, $form) {if ((function (attribute, value) {
+                return $('#versioncheckform-imeirequired').val() == 1;
+            })(attribute, value)) { yii.validation.required(value, messages, {"message":"Imei cannot be blank."}); }yii.validation.string(value, messages, {"message":"Imei must be a string.","min":11,"tooShort":"Imei should contain at least 11 characters.","max":15,"tooLong":"Imei should contain at most 15 characters.","skipOnEmpty":1});}},{"id":"versioncheckform-region","name":"region","container":".field-versioncheckform-region","input":"#versioncheckform-region","error":".invalid-feedback","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Region cannot be blank."});yii.validation.string(value, messages, {"message":"Region must be a string.","min":3,"tooShort":"Region should contain at least 3 characters.","max":3,"tooLong":"Region should contain at most 3 characters.","skipOnEmpty":1});}}], {"errorSummary":".alert.alert-danger","errorCssClass":"is-invalid","successCssClass":"is-valid","validationStateOn":"input"});
+(new bootstrap.Modal('#version-checker-modal', {"show":false,"backdrop":"static","keyboard":false}));
+function debounce(func, wait) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(function() { func.apply(context, args); }, wait);
+    };
+}
+
+function loadRecentSearches() {
+    $.getJSON('/checker/recent-searches', function(data) {
+        if (data && data.length > 0) {
+            var container = $('#recent-searches-list');
+            container.empty();
+            $.each(data, function(i, item) {
+                container.append('<div class="recent-badge" data-model="'+item.model+'" data-region="'+item.region+'">'+item.model+' ('+item.region+')</div>');
+            });
+            $('#recent-searches-container').fadeIn();
+        }
+    });
+}
+
+$('#version-checker-modal').on('shown.bs.modal', function () {
+    loadRecentSearches();
+    $('#versioncheckform-model').focus();
+});
+
+$(document).on('click', '.recent-badge', function() {
+    $('#versioncheckform-model').val($(this).data('model')).trigger('change');
+    $('#versioncheckform-region').val($(this).data('region')).trigger('change');
+    $('#version-checker-form').submit();
+});
+
+function checkImei(model) {
+    var input = $('#versioncheckform-imei');
+    var imeiRequiredInput = $('#versioncheckform-imeirequired');
+    $.post(input.data('imei-url'), { model: model, _csrf: yii.getCsrfToken() }, function(res) {
+        if(res === true) {
+            $('#imei-input-block').slideDown();
+            input.attr('data-is-required', 'true');
+            imeiRequiredInput.val(1);
+        } else {
+            $('#imei-input-block').slideUp();
+            input.removeAttr('data-is-required').val('').trigger('change');
+            imeiRequiredInput.val(0);
+        }
+    });
+}
+
+$(document).on('keyup focus', '#versioncheckform-model', debounce(function() {
+    var q = $(this).val();
+    if(q.length < 2) return;
+    $.post($(this).data('source-url'), { q: q, _csrf: yii.getCsrfToken() }, function(data) {
+        var list = $('#model-list-results');
+        list.empty().show();
+        $.each(data, function(i, item) {
+            list.append('<button type="button" class="custom-list-item w-100 text-start border-0 bg-white p-2 border-bottom">'+item.model+'</button>');
+        });
+    });
+    checkImei(q);
+}, 400));
+
+$(document).on('click', '#model-list-results .custom-list-item', function() {
+    var val = $(this).text();
+    $('#versioncheckform-model').val(val).trigger('change');
+    $('#model-list-results').hide();
+    checkImei(val);
+});
+
+$(document).on('keyup focus', '#versioncheckform-region', debounce(function() {
+    var q = $(this).val();
+    var model = $('#versioncheckform-model').val();
+    if(!model) return;
+    $.post($(this).data('source-url'), { model: model, q: q, _csrf: yii.getCsrfToken() }, function(data) {
+        var list = $('#region-list-results');
+        list.empty().show();
+        $.each(data, function(i, item) {
+            list.append('<button type="button" class="custom-list-item w-100 text-start border-0 bg-white p-2 border-bottom">'+item.region+'</button>');
+        });
+    });
+}, 400));
+
+$(document).on('click', '#region-list-results .custom-list-item', function() {
+    $('#versioncheckform-region').val($(this).text()).trigger('change');
+    $('#region-list-results').hide();
+});
+
+$('#version-checker-form').on('beforeSubmit', function() {
+    var form = $(this);
+    var imeiInput = $('#versioncheckform-imei');
+    var errorBlock = $('#checker-error-block');
+
+    if (imeiInput.attr('data-is-required') === 'true' && !imeiInput.val().trim()) {
+        imeiInput.addClass('is-invalid');
+        errorBlock.text('Please enter a valid IMEI or Serial Number to continue.').fadeIn(); 
+        return false;
+    }
+
+    var btn = form.find('button[type=submit]');
+    $.ajax({
+        url: form.attr('action'),
+        type: 'post',
+        data: form.serialize(),
+        beforeSend: function() {
+            $('#checker-loading').show();
+            btn.prop('disabled', true);
+            $('#versions-list-results').empty();
+            errorBlock.hide();
+            imeiInput.removeClass('is-invalid');
+        },
+        success: function(res) {
+            var container = $('#versions-list-results');
+            if(!res.length) {
+                errorBlock.text('Firmware not found for this model/region.').show();
+                return;
+            }
+            $.each(res, function(i, item) {
+                var date = new Date(item.build_date * 1000).toLocaleDateString();
+                var badge = (i === 0) ? '<span class="badge bg-success mb-2">Latest Update</span><br>' : '';
+                container.append('<a href="'+item.url+'" class="firmware-card shadow-sm">'+
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                        '<div>' + badge + '<strong>PDA: '+item.pda+'</strong><div class="small text-muted mt-1">'+item.region+' | '+date+'</div></div>' +
+                        '<div class="text-primary text-center"><i class="fa fa-download fa-2x"></i><br><small class="fw-bold">GET FILE</small></div>' +
+                    '</div></a>');
+            });
+        },
+        error: function(xhr) {
+            var msg = 'Firmware not found for this model/region.';
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (data.message) msg = data.message;
+            } catch(e) {}
+            errorBlock.text(msg).show();
+        },
+        complete: function() {
+            $('#checker-loading').hide();
+            btn.prop('disabled', false);
+        }
+    });
+    return false;
+});
+
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('.custom-autocomplete-list, input').length) {
+        $('.custom-autocomplete-list').hide();
+    }
+});
+
+// Ініціалізація tooltip
+var fabBtn = document.getElementById('fab-version-finder-btn');
+var tooltip = new bootstrap.Tooltip(fabBtn, {
+    title: 'Looking for firmware? Use our quick search by model and CSC!',
+    trigger: 'manual'
+});
+
+// Перевіримо, чи вже показували tooltip
+var tooltipShown = localStorage.getItem('fab_tooltip_shown');
+var showTooltip = function() {
+    if (!tooltipShown) {
+        setTimeout(function() {
+            tooltip.show();
+            localStorage.setItem('fab_tooltip_shown', 'true');
+            // Приховаємо tooltip через 6 секунд
+            setTimeout(function() {
+                tooltip.hide();
+            }, 15000);
+        }, 5000); // Показуємо через 5 секунд
+    }
+};
+
+// Показуємо при першому відвідуванні
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showTooltip);
+} else {
+    showTooltip();
+}
+
+// Приховуємо tooltip при кліку та hover на кнопку
+$(fabBtn).on('click mouseenter', function() {
+    tooltip.hide();
+});
+});</script></body></html>

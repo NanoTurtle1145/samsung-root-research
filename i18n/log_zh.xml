@@ -1,0 +1,40 @@
+<!-- RootMyS9280 log strings -->
+    <string name="log_starting">RootMyS9280 启动中</string>
+    <string name="log_payload">载荷: %1$s (修正版, kmalloc_caches 0x176cbb8)</string>
+    <string name="log_check_shizuku">[1/5] 检查 Shizuku...</string>
+    <string name="log_shizuku_not_running">Shizuku 未运行。请先启动 Shizuku！</string>
+    <string name="log_shizuku_denied">Shizuku 权限被拒绝</string>
+    <string name="log_shizuku_ready">Shizuku 就绪</string>
+    <string name="log_push_payload">[2/5] 推送载荷到 /data/local/tmp ...</string>
+    <string name="log_push_done">推送完成 (%1$s=%2$dB, %3$s=%4$dB)</string>
+    <string name="log_diag">诊断: pipe-max-size=%1$s pipe-user-pages=%2$s</string>
+    <string name="log_diag_version">诊断: /proc/version=%1$s</string>
+    <string name="log_pipe_warn">pipe-max-size (%1$dB) &lt; 128KB (exploit 需要 32 槽=128KB)，F_SETPIPE_SZ 会 EPERM</string>
+    <string name="log_cleanup">[2.6/5] 清理残留 exploit 进程与临时文件 ...</string>
+    <string name="log_cleanup_done">环境清理完成 (exit=%1$d)</string>
+    <string name="log_trigger">[3/5] 触发 CVE-2026-43499 (LD_PRELOAD /system/bin/true) ...</string>
+    <string name="log_screen_off">已自动熄屏（运行完成后将唤醒；可手动按电源键随时查看）</string>
+    <string name="log_exploit_timeout">exploit 超时（15 分钟）</string>
+    <string name="log_exploit_incomplete">exploit 未完成（可能需要多试几次 / 重启后再试，概率性成功）</string>
+    <string name="log_no_root">exploit 完成但未拿到 root（标记缺失）</string>
+    <string name="log_temp_root">临时 root 已获得！</string>
+    <string name="log_lateload">[4/5] KernelSU late-load (经 root 守护进程) ...</string>
+    <string name="log_screen_off_hint">提示: 运行期间建议熄屏（减少显示驱动 work，降低内核竞态概率）</string>
+    <string name="log_stage_fail">ksud 暂存失败 (exit=%1$d): %2$s</string>
+    <string name="log_ksud_staged">ksud 已暂存到 ksud-s25u-kdp / .ksud-stage</string>
+    <string name="log_lateload_fail">KernelSU late-load 失败 (exit=%1$d)</string>
+    <string name="log_driver_loaded">KernelSU 驱动已加载 (late-load exit=0)</string>
+    <string name="log_verify">[5/5] 验证...</string>
+    <string name="log_daemon_check">root 守护进程: %1$s</string>
+    <string name="log_install_manager">请安装 KernelSU 管理器 (me.weishu.kernelsu v3.2.5, versionCode 32525) 后即可管理 root / 安装模块</string>
+    <string name="log_flow_done">Root 流程完成！</string>
+    <string name="log_failed">失败: %1$s</string>
+    <string name="log_woken">已唤醒屏幕</string>
+    <string name="log_export_ok">已导出到 下载/rootmys9280-log.txt (%1$d 字符)</string>
+    <string name="log_export_fail">导出失败: %1$s</string>
+    <string name="log_knox_tripped">已触发 (warranty_bit=1)</string>
+    <string name="log_knox_green">完好 (warranty_bit=0, verifiedbootstate=green)</string>
+    <string name="log_knox_ok">完好 (warranty_bit=0, verifiedbootstate=%1$s)</string>
+    <string name="log_knox_unknown">未知 (verifiedbootstate=%1$s)</string>
+    <string name="log_knox_needs">未知（需 Shizuku）</string>
+    <string name="log_binder_unavailable">Shizuku binder 不可用</string>

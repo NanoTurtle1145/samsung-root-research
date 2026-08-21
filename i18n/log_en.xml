@@ -1,0 +1,40 @@
+<!-- RootMyS9280 log strings -->
+    <string name="log_starting">Starting RootMyS9280</string>
+    <string name="log_payload">Payload: %1$s (fixed, kmalloc_caches 0x176cbb8)</string>
+    <string name="log_check_shizuku">[1/5] Checking Shizuku...</string>
+    <string name="log_shizuku_not_running">Shizuku is not running. Please start Shizuku first!</string>
+    <string name="log_shizuku_denied">Shizuku permission denied</string>
+    <string name="log_shizuku_ready">Shizuku ready</string>
+    <string name="log_push_payload">[2/5] Pushing payload to /data/local/tmp ...</string>
+    <string name="log_push_done">Push done (%1$s=%2$d B, %3$s=%4$d B)</string>
+    <string name="log_diag">Diagnostic: pipe-max-size=%1$s pipe-user-pages=%2$s</string>
+    <string name="log_diag_version">Diagnostic: /proc/version=%1$s</string>
+    <string name="log_pipe_warn">pipe-max-size (%1$d B) &lt; 128KB (exploit needs 32 slots=128KB), F_SETPIPE_SZ will EPERM</string>
+    <string name="log_cleanup">[2.6/5] Cleaning residual exploit processes and temp files ...</string>
+    <string name="log_cleanup_done">Environment cleanup done (exit=%1$d)</string>
+    <string name="log_trigger">[3/5] Triggering CVE-2026-43499 (LD_PRELOAD /system/bin/true) ...</string>
+    <string name="log_screen_off">Screen turned off (will wake when done; press the power key anytime to check)</string>
+    <string name="log_exploit_timeout">exploit timed out (15 minutes)</string>
+    <string name="log_exploit_incomplete">exploit did not complete (may need several tries / reboot, probabilistic)</string>
+    <string name="log_no_root">exploit finished but no root obtained (marker missing)</string>
+    <string name="log_temp_root">Temporary root obtained!</string>
+    <string name="log_lateload">[4/5] KernelSU late-load (via root daemon) ...</string>
+    <string name="log_screen_off_hint">Hint: keep the screen off during the run (reduces display work, lowers kernel race probability)</string>
+    <string name="log_stage_fail">ksud staging failed (exit=%1$d): %2$s</string>
+    <string name="log_ksud_staged">ksud staged to ksud-s25u-kdp / .ksud-stage</string>
+    <string name="log_lateload_fail">KernelSU late-load failed (exit=%1$d)</string>
+    <string name="log_driver_loaded">KernelSU driver loaded (late-load exit=0)</string>
+    <string name="log_verify">[5/5] Verifying...</string>
+    <string name="log_daemon_check">root daemon: %1$s</string>
+    <string name="log_install_manager">Please install KernelSU Manager (me.weishu.kernelsu v3.2.5, versionCode 32525) to manage root / modules</string>
+    <string name="log_flow_done">Root flow complete!</string>
+    <string name="log_failed">Failed: %1$s</string>
+    <string name="log_woken">Screen woken</string>
+    <string name="log_export_ok">Exported to Downloads/rootmys9280-log.txt (%1$d chars)</string>
+    <string name="log_export_fail">Export failed: %1$s</string>
+    <string name="log_knox_tripped">Tripped (warranty_bit=1)</string>
+    <string name="log_knox_green">Intact (warranty_bit=0, verifiedbootstate=green)</string>
+    <string name="log_knox_ok">Intact (warranty_bit=0, verifiedbootstate=%1$s)</string>
+    <string name="log_knox_unknown">Unknown (verifiedbootstate=%1$s)</string>
+    <string name="log_knox_needs">Unknown (needs Shizuku)</string>
+    <string name="log_binder_unavailable">Shizuku binder unavailable</string>
