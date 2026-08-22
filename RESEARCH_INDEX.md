@@ -66,7 +66,8 @@
 ## 七、关键结论备忘
 
 1. **S9280 与 S928U1 内核符号 16/17 一致**，唯一差异 `kmalloc_caches`：0x176cbb8（国行）vs 0x176c6f8（美版）
-2. **F_SETPIPE_SZ EPERM 不是内核限制**：是残留 `cve43499-hold` 进程污染 uid 2000 的 pipe_bufs 配额（这也解释了酷安工具 preparing-memory 阶段 16/16 失败——同为环境问题而非其偏移错误；社区有成功案例佐证）
-3. **worklist 竞态**：注入 workqueue 时显示驱动并发入队 → 孤儿 work → cancel_work_sync 时 `__list_del_entry_valid` BUG → panic（已用"注入前重查"修复）
-4. **KNOX 完好的判断依据**：`ro.boot.warranty_bit=0` + `verifiedbootstate=green`（官方固件刷机不熔断）
-5. 普通 GKI kernelsu.ko 可在国行加载（version 32525），kdp 变体为备选
+2. **港版 DZE2 构建号 33419968 与美版 S928U1 相同**，`kmalloc_caches=0x176c6f8`（与国行 DZF2 不同，不能用 DZF2 载荷）；其余 19/20 符号与 DZF2 一致。已独立适配并真机验证成功（2026-08-22）
+3. **F_SETPIPE_SZ EPERM 不是内核限制**：是残留 `cve43499-hold` 进程污染 uid 2000 的 pipe_bufs 配额（这也解释了酷安工具 preparing-memory 阶段 16/16 失败——同为环境问题而非其偏移错误；社区有成功案例佐证）
+4. **worklist 竞态**：注入 workqueue 时显示驱动并发入队 → 孤儿 work → cancel_work_sync 时 `__list_del_entry_valid` BUG → panic（已用"注入前重查"修复）
+5. **KNOX 完好的判断依据**：`ro.boot.warranty_bit=0` + `verifiedbootstate=green`（官方固件刷机不熔断）
+6. 普通 GKI kernelsu.ko 可在国行加载（version 32525），kdp 变体为备选
