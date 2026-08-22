@@ -71,14 +71,17 @@
 | `07_发布物/run_logs/S9280_DZF2_success.txt` | S9280 全链路成功日志（attempt 2/30，root 完成 + KernelSU late-load exit=0） |
 | `07_发布物/run_logs/BYH7_e1q_fail.txt` | OneUI7 BYH7 失败日志（CFI 通过，pipe 页 cache gate 失败） |
 
-> BYH7 关键结论：`pipe_buffer` 结构体页内布局与 DZF2（6.1.145）不同，需按 6.1.99 BTF 核对字段偏移/数组步长；`object_index=28` 超界（max=27）为偶发软性差异，重试可绕过。
+> BYH7 关键结论：`struct page` 字段偏移错误（`cache08=fffffffe...` vmemmap 地址特征），需按 6.1.99 BTF 核对 `STRUCT_PAGE_SIZE=0x40`、`STRUCT_SLAB_CACHE_OFF=0x08` 等四项偏移；`object_index=28` 超界（max=27）为偶发软性差异，重试可绕过。
+> 详见 `03_参考研究/SM-S9380_RMG_root_experience.md` §六（FOPS cache gate 失败判据）与 `RUN_LOG_ANALYSIS.md` §2.3。
 
 ## 八、关键结论备忘
 
-1. **S9280 与 S928U1 内核符号 16/17 一致**，唯一差异 `kmalloc_caches`：0x176cbb8（国行）vs 0x176c6f8（美版）
+78: 1. **S9280 与 S928U1 内核符号 16/17 一致**，唯一差异 `kmalloc_caches`：0x176cbb8（国行）vs 0x176c6f8（美版）
 2. **港版 DZE2 构建号 33419968 与美版 S928U1 相同**，`kmalloc_caches=0x176c6f8`（与国行 DZF2 不同，不能用 DZF2 载荷）；其余 19/20 符号与 DZF2 一致。已独立适配并真机验证成功（2026-08-22）
 3. **F_SETPIPE_SZ EPERM 不是内核限制**：是残留 `cve43499-hold` 进程污染 uid 2000 的 pipe_bufs 配额（这也解释了酷安工具 preparing-memory 阶段 16/16 失败——同为环境问题而非其偏移错误；社区有成功案例佐证）
 4. **worklist 竞态**：注入 workqueue 时显示驱动并发入队 → 孤儿 work → cancel_work_sync 时 `__list_del_entry_valid` BUG → panic（已用"注入前重查"修复）
 5. **KNOX 完好的判断依据**：`ro.boot.warranty_bit=0` + `verifiedbootstate=green`（官方固件刷机不熔断）
 6. 普通 GKI kernelsu.ko 可在国行加载（version 32525），kdp 变体为备选
 7. **S9280 DZF2 成功判定日志**：`pipe page idx=0 ... match=1` → `phys step pipe probe found=1` → `root umh result wake=1 complete=1 retval=0 socket=1` → `pipe physrw done=1 root=1 rw64=1/1 uid=2000->0`
+8. **Shell 域 ≠ App 域**：提权逻辑在 Shell 域跑通不保证 App 域能通（SELinux/cgroup/seccomp 差异，cgroup 归属影响 kmalloc 缓存匹配）。BYH7 适配需在 App 域完整验证（源自 SM-S9380 移植经验）
+9. **boot quiet window 120 秒**是稳定成功的关键参数（`APP_MIN_BOOT_UPTIME_SEC=120`），fusion-s24u 已是此值；不要为省时间改小（实测 60 秒必失败，120 秒一轮秒杀）

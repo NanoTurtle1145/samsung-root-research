@@ -98,13 +98,45 @@ ksud late-load: exit=0 → KernelSU 驱动已加载
 
 **次要点**：attempt 2 第一次 `mm leaked object_index=28` 超界（`max=27`）被拒，说明 BYH7 的 mm 分配布局与 DZF2 略有差异（可能只是该次分配偶然落到更高阶 slab），重试后 `object_index=5` 正常。这是软性差异，重试可绕过。
 
+### 2.3 根因修正（2026-08-22，对照 SM-S9380 移植经验）
+
+**更精确的定位：`struct page` 字段偏移错误（vmemmap 地址特征），而非笼统的 pipe_buffer 布局。**
+
+SM-S9380 经验（`03_参考研究/SM-S9380_RMG_root_experience.md` §六）给出 FOPS cache gate 失败判据：
+
+> 失败典型 2：`cache08=fffffffe24997a08` —— 读到 **vmemmap 地址**，即 struct page 偏移算错。
+
+对照 BYH7 失败日志：
+
+```
+[*] pipe page idx=0 page=ffffff889bb38000 head=fffffffe226ece00
+    cache08=fffffffe208aac08 cache10=fffffffe2919de08 cache18=0 cache20=0 type=ffffff7f match=0
+```
+
+- `cache08=fffffffe208aac08`、`cache10=fffffffe2919de08` 均以 **`fffffffe` 开头 = vmemmap 区域地址** → struct page 字段偏移读错（把 vmemmap 内容当成 slab_cache 指针）
+- S9280 成功对照：`cache08=0000000000000000`、`cache18=ffffff8001cf6800`（正常内核地址）→ 偏移正确
+
+**需核对的四项偏移**（源自 SM-S9380 ZG1 移植结论，BYH7/6.1.99 需单独确认）：
+
+```
+STRUCT_PAGE_SIZE              = 0x40
+STRUCT_PAGE_COMPOUND_HEAD_OFF = 0x08
+STRUCT_SLAB_CACHE_OFF         = 0x08
+STRUCT_PAGE_TYPE_OFF          = 0x30
+```
+
+**附加因素**：SM-S9380 经验还提示 **Shell 域 vs App 域差异**（cgroup 归属影响 kmalloc 落 cgroup 还是 normal 缓存，与 FOPS 的 kmalloc_cgroup_2k_cache 匹配相关）。BYH7 测试走 App（Shizuku），除偏移外还需考虑运行环境对缓存归属的影响。
+
 ---
 
 ## 3. 下一步建议
 
-1. **核对 `pipe_buffer` 布局**：用 `llvm-objdump` 或 BTF（`vmlinux_byh7.elf`）反查 BYH7 内核中 `pipe_buffer` 的 `page/offset/len/ops/flags` 字段偏移与数组步长（16/24/32 字节），对照 exploit 源码 `pipe.c` 中硬编码的页内扫描逻辑，修正特征匹配。
-2. **核对 `COMPACT_RT_MUTEX_WAITER` 相关偏移**（byh7-target-complete.md 已标注）——若 pipe 阶段修正后 root 阶段仍失败，优先查此项。
-3. **重试覆盖**：BYH7 的 `object_index=28 超界` 与 `fops slide` 竞态均可靠多次 attempt 覆盖（attempt 2 里 CFI 已通过，说明链路主体可行，差的只是 pipe 布局一个常量）。
+1. **核对 `struct page` 四项偏移**（BYH7 失败的直接根因，§2.3）：用 BTF（`vmlinux_byh7.elf`）反查 6.1.99 内核的 `STRUCT_PAGE_SIZE=0x40`、`STRUCT_PAGE_COMPOUND_HEAD_OFF=0x08`、`STRUCT_SLAB_CACHE_OFF=0x08`、`STRUCT_PAGE_TYPE_OFF=0x30` 是否与 DZF2 一致；若不一致，按 SM-S9380 移植流程（解包 boot.img → BTF 反推 → 对照旧 profile 修正）更新 BYH7 target.h。
+2. **核对 `pipe_buffer` 布局**：`pipe/page/offset/len/ops/flags` 字段偏移与数组步长（16/24/32 字节），对照 exploit 源码 `pipe.c` 页内扫描逻辑（在 struct page 偏移修正后如仍不匹配再查）。
+3. **核对 `COMPACT_RT_MUTEX_WAITER` 相关偏移**（byh7-target-complete.md 已标注）——若前两步修正后 root 阶段仍失败，优先查此项。
+4. **App 域验证**：SM-S9380 经验提示 Shell 域 ≠ App 域（cgroup 归属影响 kmalloc 缓存匹配），BYH7 修正偏移后必须走 App（Shizuku）完整验证，不能只在 adb shell 里测。
+5. **重试覆盖**：BYH7 的 `object_index=28 超界` 与 `fops slide` 竞态均可靠多次 attempt 覆盖（attempt 2 里 CFI 已通过，说明链路主体可行，差的只是偏移常量）。
+6. **时序**：保持 `APP_MIN_BOOT_UPTIME_SEC=120`（当前已是），不要改小（SM-S9380 实测 60 秒必失败）。
 
 ---
 
