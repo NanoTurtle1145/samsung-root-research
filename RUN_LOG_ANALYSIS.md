@@ -218,3 +218,21 @@ llvm-objdump -d --start-address=<pipe_fcntl 附近> vmlinux_byh7.elf | grep -A20
 - marker 写入提前到 gate 前
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v3.apk`（payload md5 `7accca26`）。
+
+---
+
+## 6. v3 真机日志分析 → v4 修复（2026-08-22）
+
+**v3 结果**（`chc7rootmys9280-SM-S9210 (3).txt`，恢复的上次会话日志约 12 次尝试）：
+- 前 10 次尝试 `triggered=0`（CFI 劫持未触发，slide route 失败）——与 v1（全部 triggered=1）不同，可能是 CFI 时序/随机性
+- **第 11 次尝试 CFI 成功**（`triggered=1`，`cfi write ret=35`，`cfi restoring misc_fops`），gate 扫描 64 页：
+  - `pipe caches normal1k=ffffff8001cf6700 normal2k=ffffff8001cf6800 cgroup1k=ffffff8001cf7000 cgroup2k=ffffff8001cf7100 selected=ffffff8001cf7100`（与 v1 相同，8B 逐槽读取工作正常）
+  - **idx=26-33 连续 8 页（order-3 32KB slab）`cache18=ffffff88b4a95410` 一致非零、`cache20` 连续递减（0x10ee→0x10e7）**——这是 pipe_buffer 对象所在的 slab！
+  - 但 `cache18=ffffff88b4a95410` **不在 56 个 kmalloc 槽位中**（非 normal2k/cgroup2k），原 cache_match 拒绝 → `phys step cache gate failed slab=0000000000000000 want=ffffff8001cf7100`
+- 第 12 次尝试 `triggered=1 step=4 errno=25`（cfi misc_fops mismatch ret=-1，CFI 阶段失败）
+
+**关键洞察**：BYH7(6.1.99) 的 pipe_buffer 对象落在**另一个 kmem_cache**（slab_cache=ffffff88b4a95410），不是 DZF2 的 normal2k。可能原因：6.1.99 的 pipe 分配路径用 kmalloc-rcl-2k（reclaimable）或 memcg 变体；或泄漏页回 buddy 后 SLUB 从邻近缓存复用。**gate 只认 normal2k/cgroup2k 是失败根因**（此前一直假设 pipe_buffer 必在 normal2k/cgroup2k）。
+
+**v4 修复**（commit 292cf7b）：`pipe_cache_matches` 放宽为接受**任何非零 slab_cache**，由 `find_pipe_buffer` 做最终验证（page in VMEMMAP + ops==pipe_buf_ops_addr + len in [1,PIPE_RECLAIM] 三重严格特征，不会误判）。64 页扫描 + 逐槽 8B 读取 + gate 内 find 验证均保留。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v4.apk`（payload md5 `14dc1c64`）。
