@@ -82,6 +82,16 @@ samsung_root_research/
 - **KNOX 完好判断依据**：`ro.boot.warranty_bit=0` + `verifiedbootstate=green`
 - 普通 GKI kernelsu.ko 可在国行加载（version 32525），kdp 变体为备选
 
+### 文档导航
+
+| 文档 | 内容 |
+|------|------|
+| [VULNERABILITY_ANALYSIS.md](./VULNERABILITY_ANALYSIS.md) | **漏洞原理剖析**：rtmutex UAF 成因、利用链全景、防护绕过路径、worklist 竞态（研究笔记） |
+| [ADAPTATION_GUIDE.md](./ADAPTATION_GUIDE.md) | 适配方法论与排坑记录（操作流程） |
+| [RUN_LOG_ANALYSIS.md](./RUN_LOG_ANALYSIS.md) | 成功/失败日志逐行对比与失败特征判读 |
+| [RESEARCH_INDEX.md](./RESEARCH_INDEX.md) | 研究资料全量索引 |
+| [03_参考研究/SM-S9380_RMG_root_experience.md](./03_参考研究/SM-S9380_RMG_root_experience.md) | SM-S9380 实战经验（boot quiet window / struct page 偏移 / Shell-App 域差异） |
+
 ---
 
 ## 适配流程（概要）
