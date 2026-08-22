@@ -183,3 +183,20 @@ llvm-objdump -d --start-address=<pipe_fcntl 附近> vmlinux_byh7.elf | grep -A20
 #   [*] pipe page idx=0 ... match=1
 #   [*] root umh result wake=1 complete=1 retval=0 socket=1
 ```
+
+---
+
+## 4. 修复实施（2026-08-22 pipe cache gate v2）
+
+**确认的根因**（与 §2 收敛结论一致）：BYH7(6.1.99) 的泄漏页是 LRU 匿名页（`cache08/10=vmemmap LRU 指针`、`cache18=0`），而 DZF2(6.1.145) 的泄漏页是 kmalloc-2k slab 页（`cache18=normal2k`，pipe 对象复用了同页）。即 **pipe 对象未落位在泄漏页 32KB 邻域**（泄漏页释放后回 buddy，而非留在 SLUB），gate 在 8 页扫描内找不到 kmalloc-2k slab 页。
+
+**pipe caches 值相同的解释**：S9210(S24) 与 S9280(S24+) 同属 Exynos 2400 平台，物理内存布局/启动分配确定性一致 → kmem_cache 结构体（含 normal1k/2k、cgroup1k/2k）物理地址完全相同。DZF2 成功日志中 `pipe page idx=0 cache18==normal2k(bulk 读取值)` 自洽证明读取真实，因此 BYH7 的 `pipe caches` 打印相同值也是真实读取，非"P0 读取失效"。
+
+**已实施的修复**（commit 3c3d09b）：
+1. `pipe_reclaim_cache_gate`：448B 大块 P0 读取改为逐槽位 `kernel_read64`（8B 路径已验证可靠；即使大块读取在 BYH7 上行为异常也能兜底）
+2. `PIPE_CANDIDATE_PAGES` 8→64：gate 扫描范围从泄漏页 32KB 邻域扩到 256KB
+3. gate 命中 slab 页时立即调用 `find_pipe_buffer` 验证页内确有 pipe_buffer 对象（防止扩大扫描后命中无关 kmalloc-2k 页）
+4. `install_pipe_physrw`：marker 写入提前到 gate 之前（gate 内 find 依赖 pb.len）
+5. BYH7 `target.h`：`PIPE_DRAIN/RECLAIM_SLABS` 10→16，更多 pipe 对象提高落位概率
+
+**验证状态**：`build/e1q-S9210ZCU4BYH7/cve-2026-43499-app.stable.so` md5 `2ea5f6c5`；已打包 `RootMyS24-debug-BYH7-pipe-gate-v2.apk` 待真机测试。
