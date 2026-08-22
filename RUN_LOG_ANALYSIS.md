@@ -200,3 +200,21 @@ llvm-objdump -d --start-address=<pipe_fcntl 附近> vmlinux_byh7.elf | grep -A20
 5. BYH7 `target.h`：`PIPE_DRAIN/RECLAIM_SLABS` 10→16，更多 pipe 对象提高落位概率
 
 **验证状态**：`build/e1q-S9210ZCU4BYH7/cve-2026-43499-app.stable.so` md5 `2ea5f6c5`；已打包 `RootMyS24-debug-BYH7-pipe-gate-v2.apk` 待真机测试。
+
+---
+
+## 5. v2 真机验证失败 → v3 修复（2026-08-22）
+
+**v2 结果**（`chcbyh7rootmys9280-SM-S9210 (6).txt`）：30/30 次尝试全部 `[!] pipe page child did not report base`，日志根因：
+```
+[!] SYSCHK(fcntl(pipefd[0], F_SETPIPE_SZ, slots * PAGE_SIZE)): Operation not permitted
+```
+**根因**：v2 把 `PIPE_DRAIN/RECLAIM_SLABS` 从 10 改到 16 → 512 pipes × 32 slots = 16384 页，**恰好顶满 `pipe-user-pages-soft`(16384页) 软限制**，后续 `F_SETPIPE_SZ` 全部 EPERM → child 无法分配 pipe 对象 → 泄漏后的 base 未报告 → 整个尝试提前失败（连 gate 都没走到）。
+
+**v3 修复**（commit d151113）：`PIPE_DRAIN/RECLAIM_SLABS` 回退 10（320 pipes = 10240 页 < 16384），保留 v2 其余有效改动：
+- 逐槽位 8B 读取 kmalloc_caches
+- `PIPE_CANDIDATE_PAGES` 64（256KB 扫描）
+- gate 命中页 find_pipe_buffer 验证
+- marker 写入提前到 gate 前
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v3.apk`（payload md5 `7accca26`）。
