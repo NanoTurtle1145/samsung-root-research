@@ -193,20 +193,27 @@ adb shell '/data/local/tmp/su -c id'
 
 ### 9.4 待定标项（下一步）
 
-1. **结构体布局**（无 BTF，需反汇编 + 5.10 源码核对）：
-   - `rt_mutex_waiter`（扁平 10 words 布局）→ slide/fops 伪造表
-   - `task_struct`（cred / real_cred / pid 偏移）
-   - `pipe_buffer`（page/offset/len/ops 步长）
-   - `struct page`（size / compound_head / slab_cache / type 偏移）
-2. **物理内存常量**（Tensor GS101，需从 dts/abl 读取，不可套 MediaTek 0x40000000）：
-   - `P0_PHYS_OFFSET`（DRAM 物理基址）
-   - `P0_KERNEL_PHYS_LOAD`（内核物理加载地址）
-3. **exploit 工程选择**：推荐基于 [aristotle](https://github.com/soralis0912/CVE-2026-43499-aristotle) fork（同为 5.10 + Android 12 + MediaTek 无 BTF），改造 Pixel 6 target；或基于 [GhostLock-5.10](https://github.com/R0rt1z2/GhostLock-5.10)（有 karat/sunstone 多 target 结构）
-4. **编译参数**：API=31（Android 12）或 API=33/34（按实际系统，用户系统为 Android 15 → API 35，需验证 payload 兼容性）
+> **更新（2026-08-23）：以下项目已全部完成**——结构体布局（反汇编验证 + 2 处修正）、物理常量（DRAM 0x80000000）、exploit 工程（基于 aristotle fork）、编译参数（API=35）均已定标并编译出 preload.so 双变体（0x3e0/0x400）。详见 `02_exploit工程/pixel6-ghostlock/ADAPTATION.md`。
+
+1. ✅ **结构体布局**（无 BTF，反汇编 + 5.10 源码核对）：
+   - ✅ `rt_mutex_waiter`（扁平 10 words）→ slide/fops 伪造表
+   - ✅ `task_struct`（cred 0x778/0x780、pi_lock 0x86c、pi_blocked_on 0x898）
+   - ✅ `pipe_buffer`（pipe_write 反汇编验证）
+   - ✅ `struct page`（mm_alloc memset 实测 0x3e0）
+2. ✅ **物理内存常量**（Tensor GS101）：
+   - ✅ `P0_PHYS_OFFSET=0x80000000`（Project Zero 实测 + dts 交叉验证）
+   - ✅ `P0_KERNEL_PHYS_LOAD=0x80000000`（text_offset=0x0，physdiag 真机判据）
+3. ✅ **exploit 工程**：基于 [aristotle](https://github.com/soralis0912/CVE-2026-43499-aristotle) fork（5.10 + 无 BTF），已定标 Pixel 6 target
+4. ✅ **编译参数**：API=35（Android 15），preload.so 已编译（含 physdiag 诊断）
+5. ✅ **交付 App**：RootMyPixel6 核心功能 App（Shizuku 授权 + 内置双载荷 + 一键触发 + 实时日志 + root 检测）
 
 ### 9.5 工作产物位置
 
 - `~/下载/boot-pixel6.img`（原始 boot 镜像）
 - `/home/nt/项目/pixel6_work/kernel`（解压内核）
 - `/home/nt/项目/pixel6_work/vmlinux_pixel6.elf`（含符号 ELF，59 MB）
+- `~/下载/pixel6-preload.so` / `pixel6-preload-mmsz400.so`（载荷双变体）
+- `~/下载/RootMyPixel6-v1.0-debug.apk`（核心功能 App）
+- `02_exploit工程/pixel6-ghostlock/`（完整适配记录 + App 源码）
+- **剩余**：真机验证（待 Pixel 6 设备到位）
 

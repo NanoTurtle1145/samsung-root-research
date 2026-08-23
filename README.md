@@ -73,6 +73,12 @@ samsung_root_research/
 | S9280ZCS6DZF2 (One UI 8.5) | SM-S9280 国行 | 6.1.145 | 已验证，真机 root 成功 |
 | S9280ZCS6DZG1 (One UI 8.5) | SM-S9280 国行 | 6.1.145 | 已定标，载荷已编译 |
 | S9210ZCU4BYH7 (One UI 7) | SM-S9210 国行 | 6.1.99 | 已定标，待真机验证 |
+| **AP4A.250205.002 (Android 15)** | **Pixel 6 (oriole)** | **5.10.214** | **已定标 + 载荷已编译 + 核心 App 交付，待真机验证** |
+
+> Pixel 6 是**跨平台（Tensor GS101 / 三星 Exynos 系）首次移植**：vmlinux-to-elf 恢复 145K 符号、
+> 结构体反汇编验证（含 SELINUX enforcing +1、MM_STRUCT_SZ 0x3e0 两处修正）、
+> 双变体载荷（0x3e0/0x400）、physdiag 诊断、RootMyPixel6 核心功能 App。
+> 详见 `02_exploit工程/pixel6-ghostlock/ADAPTATION.md` 与 `03_参考研究/Pixel6_5.10_root方案.md`。
 
 ### 关键结论
 
