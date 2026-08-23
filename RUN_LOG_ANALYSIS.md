@@ -432,3 +432,27 @@ triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自�
 内核写坏的概率事件，多跑即可）。
 
 **CZA1 港版适配完成**：One UI 8.0 / Android 16 / kernel 6.1.128 真机 root 验证通过。
+
+---
+
+## 14. 💡 根因闭环：省电模式 = 在线核数不足 = futex_hashsize 错位（2026-08-24）
+
+**测试人员反馈**：一直开着省电模式，所以之前大量失败；**关闭省电模式后 v2.5.4
+第一版载荷（SHA 2a6f101f，MM_STRUCT_SZ=0x3c0，无 roundup 修复）真机成功**。
+
+这与此前 section 12 的诊断完全闭环：
+- 省电模式 → 内核热插拔关闭部分核心 → **在线核数 < possible 核数（8）**
+- 用户空间（无 roundup）：`futex_hashsize = sysconf(ONLINE)×256`
+  省电模式 7 核 → **1792**；内核 `roundup_pow2(possible×256)` = **2048** → 错位
+- KernelSnitch collision finding（纯时序）仍成功，但 bruteforce 的用户空间
+  futex_hash 与内核 hash 桶无法匹配 → mm_struct 泄漏失败（全部历史失败日志的共同特征）
+- 8 核全在线时 2048 = 2048 → v2.5.4 原版即可成功
+
+**结论**：
+1. v2.5.4 第一版载荷在**关闭省电模式**（8 核在线）下是正确可用的 —— 按用户要求已
+   并回 App 主线（commit a0a685d），research target.h MM_STRUCT_SZ 同步 0x3c0
+   （commit 36f94ca）
+2. hashfix 载荷（03f11ba6，roundup 修复）在省电模式开关两种情况下都能成功，
+   作为更强版本保留；v2.5.4 原版存档于标签 `v2.5.4-cza1-v1` / `cza1-v1-adapt`
+3. App 已加省电模式检测提示（commit e47044d）：dumpsys power 检测
+   mPowerSaveMode=true 时输出警告，提示先关闭省电模式
