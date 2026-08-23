@@ -339,3 +339,19 @@ v4 与 v5 的 exploit payload **完全相同**（md5 14dc1c64），唯一差异�
 **v8 修复**（commit a3f12e9）：`close(leak_memfd)` 从泄漏前移到泄漏后、pipe 对象（PIPE_RECLAIM）分配完成后。泄漏期间 mm_struct 存活在 kmalloc-2k slab（16 对象占 1 个，其余空闲可被 pipe_buffer 复用）→ 泄漏页保持 normal2k → gate 命中。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v8.apk`（payload md5 `754f7134`）。
+
+---
+
+## 11. v8 日志 → v9 CFI 触发重试修复（2026-08-23）
+
+**v8 日志**（`rootmys9280-SM-S9210 (1)(3).txt`，0823-1829）：
+- 3/3 尝试 `triggered=0`（CFI 触发失败），slide=0x180000 与 v4 成功时**完全相同** → **CFI 触发是纯随机竞态**（v4 1/1 成功 vs v8 0/3 失败，同 slide）
+- `app fops slide attempt=1/1` → 每次 supervisor 尝试只有 **1 次** CFI 触发机会
+
+**问题**：v6 加的 `APP_FOPS_FRESH_PAGE_ATTEMPTS=5` 只在 `APP_REQUIRE_FRESH_P0_SESSION` 分支生效；**BYH7 未定义该宏**，main.c 走 else 分支固定 `attempt<=1`。所以 v6-v8 实际每进程只试 1 次 CFI，30 次 supervisor 尝试内命中率低（v4 运气好 1/1 命中，v8 0/3 未命中）。
+
+**v9 修复**（commit 1e003c7）：main.c else 分支同样读取 `APP_FOPS_FRESH_PAGE_ATTEMPTS`（=5），单进程内最多 5 次 CFI 触发尝试（配合 v7 超时防冻结）。
+
+**注意**：v8 的 leak_memfd 时序修复（泄漏页类型）**尚未被真机验证**——v8 全部 triggered=0 提前失败，没走到 gate。v9 的 CFI 重试能让更多尝试进入 gate 阶段，才能验证泄漏页类型修复是否有效。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v9.apk`（payload md5 `f5feed04`）。
