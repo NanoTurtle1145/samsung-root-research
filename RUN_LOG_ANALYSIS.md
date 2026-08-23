@@ -292,3 +292,29 @@ v4 与 v5 的 exploit payload **完全相同**（md5 14dc1c64），唯一差异�
 **v6 修复**（commit 待）：
 1. `slide_app.c slide_leak_physical_base`：tracefs 泄漏 slide=0 时**不走 APP_TRACEFS_KASLR_DIRECT 直接提交**，改走物理扫描（P0 pipe oracle gate/probe）验证真实 slide
 2. BYH7 `target.h`：`APP_FOPS_FRESH_PAGE_ATTEMPTS 5`——单进程内多次 CFI 触发尝试（原来每次进程只试 1 次，30 次 supervisor 尝试内命中率低）
+
+---
+
+## 9. v6 两次日志 → v7 卡死修复（2026-08-23）
+
+**v6 日志**（`0823-1055_BYH7_v5_卡死_pselect路由.txt` / `0823-1055_BYH7_v5_卡死_skbuff回收.txt`）：
+- 两日志都"已从上次会话恢复"→ **设备在 exploit 运行中重启/冻结**（卡死确认）
+- `(2).txt`：slide=0x180000 正常、泄漏/mmun 全成功，但卡在 `slide child context route=pselect` 后——**无 `app fops slide attempt` 输出**（父进程阻塞在 waitpid）
+- `(3)(2).txt`：卡在 `sk_buff reclaim` 后
+
+**卡死根因**（slide_app.c 竞态所有等待均为无限循环）：
+1. waiter 线程 `while(!owner_acquired)` 无限旋转——owner 线程 `FUTEX_LOCK_PI` 失败时 `return NULL` 不置位 → waiter 永久卡
+2. child 主线程 `while(!route_done)` 无限等——waiter 卡死则 route_done 永不置位
+3. 父进程 `waitpid(child)` 无限阻塞——child 卡死则父进程永久卡 → **exploit 进程冻结 → 设备无响应**
+4. consumer 线程 `while(consume_go)` 不检查 stop——pselect 挂起则 join 卡死
+
+**v7 修复**（commit 7c8d3ea）：`slide_wait_flag(flag, timeout_ms)` 毫秒超时辅助，替换全部无限等待：
+- waiter 等 owner_started/deadlock_seen/owner_acquired：5s
+- child 主线程等 route_done：ROUTE_WAIT_SECONDS(8s)，超时置 route_stop+consume_stop 并 join
+- 线程就绪 trio 等待：5s
+- consumer consume_go：5s
+- 父进程 waitpid：WNOHANG 轮询 +(ROUTE_WAIT_SECONDS+8)s 超时后 SIGKILL
+- pselect stext 管道 read：poll 超时后 SIGKILL
+超时后返回失败，supervisor 继续下次尝试（配合 APP_FOPS_FRESH_PAGE_ATTEMPTS=5）。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v7.apk`（payload md5 `d73df0f6`）。
