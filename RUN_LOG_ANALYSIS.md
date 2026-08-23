@@ -269,3 +269,26 @@ late-load: private mount namespace: Permission denied
 **v5 修复**（commit 3753779）：`run_kernelsu_late_load` 中 unshare(CLONE_NEWNS) 失败时 fallback 直接 exec `/data/local/tmp/ksud-s25u-kdp`（SELinux 已 permissive，无需 bind mount 到 /system/bin/logcat）。注意 `make stable` 只构建 app .so，root helper 需 `make app` 单独构建——APK 中旧 root helper 不含此修复。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v5.apk`（payload md5 `14dc1c64` 不变，root helper md5 `1a79f8b4`）。
+
+---
+
+## 8. v5 两次日志分析 → v6 修复（2026-08-23）
+
+**v5 日志**（`chcbyh7v5rootmys9280-SM-S9210 (1)(2).txt` 小 / `chcbyh7v5(2)rootmys9280-SM-S9210(1).txt` 大）：
+- 两个日志都带"已从上次会话恢复 N 行"→ **设备在 exploit 运行中重启/冻结**（测试者反馈"显示成功却卡死"与此吻合——可能是 CFI 失败路径累积的不稳定或 late-load 未加载）
+- 大日志 4 次尝试全部 `triggered=0`（CFI 触发失败）；小日志 1 次尝试后在 `sk_buff reclaim` 截断
+- 大日志 `supervisor retained p0_offset=0x0`——**slide=0 被接受并强制后续尝试**
+
+**关键对照**：
+| 日志 | slide | triggered=1 成功率 |
+|---|---|---|
+| v1（旧版 3bad70bb） | 0x120000 | 26/30 (87%) |
+| v3（7accca26） | 0x90000 | 2/12 (17%) |
+| v4（14dc1c64） | 0x180000 | 1/1 (100%) 成功 |
+| v5（14dc1c64） | **0** | 0/4 (0%) |
+
+v4 与 v5 的 exploit payload **完全相同**（md5 14dc1c64），唯一差异是 slide 与 boot 状态 → **CFI 触发成功率随 boot 随机变化**，且 **slide=0 高度可疑**（tracefs 泄漏读到 caller==链接地址时误报 slide=0；真实 KASLR slide=0 概率仅 1/32）。
+
+**v6 修复**（commit 待）：
+1. `slide_app.c slide_leak_physical_base`：tracefs 泄漏 slide=0 时**不走 APP_TRACEFS_KASLR_DIRECT 直接提交**，改走物理扫描（P0 pipe oracle gate/probe）验证真实 slide
+2. BYH7 `target.h`：`APP_FOPS_FRESH_PAGE_ATTEMPTS 5`——单进程内多次 CFI 触发尝试（原来每次进程只试 1 次，30 次 supervisor 尝试内命中率低）
