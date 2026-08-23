@@ -355,3 +355,29 @@ v4 与 v5 的 exploit payload **完全相同**（md5 14dc1c64），唯一差异�
 **注意**：v8 的 leak_memfd 时序修复（泄漏页类型）**尚未被真机验证**——v8 全部 triggered=0 提前失败，没走到 gate。v9 的 CFI 重试能让更多尝试进入 gate 阶段，才能验证泄漏页类型修复是否有效。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v9.apk`（payload md5 `f5feed04`）。
+
+---
+
+## 12. CZA1 港版 KernelSnitch mm_struct 泄漏持续失败 → futex_hashsize 对齐修复（2026-08-23）
+
+**CZA1 日志**（`rootmys9280-SM-S9280 (2).txt`，0823-1809，3 会话×30 次）：
+- 会话 A：30/30 `pipe KernelSnitch sk_buff page leak failed`（第一次 KernelSnitch 全败）
+- 会话 B/C：28/30 同款失败 + 2 次到 `fresh physrw pipe page` 但 `KernelSnitch mm_struct leak failed`（第二次 KernelSnitch 全败）
+- 无一次 `collision finding failed` → **collision finding（纯时序侧信道）成功，但 bruteforce 的 mm_struct 泄漏失败**
+
+**排查过程**（全部排除）：
+1. **MM_STRUCT_SZ**：BTF sizeof(mm_struct)=0x3c0 但 SLUB 对象 0x400（含对齐）；已从 0x3c0 改回 0x400，无改善
+2. **futex key 构造**：反汇编 CZA1(6.1.128) vs DZG1(6.1.145) 的 `get_futex_key` 逐字节一致（mm@0 / address 页对齐@8 / offset@16，`stp x23,x21,[x19]` 相同）
+3. **jhash2**：两内核标准实现一致
+4. **mm_cache_init**：两内核逐字节一致（`add w1, w8, #0x3c0` 对象大小算法相同）
+5. **符号偏移/指纹**：20/20 符号 nm 交叉验证 + p0 别名地址全部对上
+
+**真正根因**：`futex_hashsize` 计算语义不一致——
+- **内核** `futex_init`：`roundup_pow2(bitmap_weight(__cpu_possible_mask) * 256)`
+- **用户空间非 FRESH 分支**（futex_hash.h）：`sysconf(_SC_NPROCESSORS_ONLN) * 256`（**无 roundup**）
+
+S9280 (Snapdragon 8 Gen 3, nr_cpu_ids=32, possible=8)：8 核全在线时 2048=2^11 恰好匹配；若运行时热插拔关核（在线<8），如 7 核 → 用户 1792 vs 内核 2048 → hash 表大小错位。collision finding 用纯时序（FUTEX_WAKE 耗时）不受影响，但 bruteforce 用用户空间 `futex_hash()` 计算，与内核 hash 桶无法匹配 → mm_struct 找不到。
+
+**修复**（research a7038eb / app 7f46bb4）：futex_hash.h 非 FRESH 分支统一走 roundup_pow2 循环（与 FRESH 分支一致），并支持 `KERNELSNITCH_FUTEX_HASH_SIZE` 强制覆盖。
+
+**待验证**：`~/下载/RootMyS24-debug-CZA1-hashfix.apk`（payload cza1 SHA256 `03f11ba6`）。
