@@ -37,6 +37,8 @@
 
 | 路径 | 说明 |
 |---|---|
+| `03_参考研究/Pixel6_5.10_root方案.md` | **Pixel 6（内核 5.10）Root 方案调研**：GhostLock 5.10 移植路线 + Root-My-Pixel 现成方案 + KernelSU 刷入（2026-08-23） |
+| `03_参考研究/SM-S9380_RMG_root_experience.md` | SM-S9380 实战经验（boot quiet window / struct page 偏移） |
 | `~/rootmygalaxy/Root-My-Galaxy/` | S25U 免解锁 root 参考工程（App 端） |
 | `~/rootmygalaxy/Root-My-Galaxy-Payloads/` | 载荷仓库：PORTING.md、S928U1.md、各机型 kdp 模块 |
 | `.../kernelsu/` | KernelSU v3.2.5 各机型变体（e3q-S928U1-kdp 等） |
