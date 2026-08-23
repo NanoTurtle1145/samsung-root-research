@@ -48,3 +48,6 @@ devices_ports/**/kernel
 # ---- 系统文件 ----
 .DS_Store
 Thumbs.db
+
+# GitHub 发布凭据（含 token，勿提交）
+07_发布物/GITHUB_RELEASE_CREDENTIALS.md
