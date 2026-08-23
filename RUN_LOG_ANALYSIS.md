@@ -381,3 +381,18 @@ S9280 (Snapdragon 8 Gen 3, nr_cpu_ids=32, possible=8)：8 核全在线时 2048=2
 **修复**（research a7038eb / app 7f46bb4）：futex_hash.h 非 FRESH 分支统一走 roundup_pow2 循环（与 FRESH 分支一致），并支持 `KERNELSNITCH_FUTEX_HASH_SIZE` 强制覆盖。
 
 **待验证**：`~/下载/RootMyS24-debug-CZA1-hashfix.apk`（payload cza1 SHA256 `03f11ba6`）。
+
+---
+
+## 12. v9 日志 → v10 回退（2026-08-23）
+
+**v9 日志**（`rootmys9280-SM-S9210 (2)(2).txt`，0823-2215）：
+- **CFI 重试生效**：`app fops slide attempt=1/5 ~ 5/5`（delay 70000/60000/80000/40000/90000）
+- **但 6 个进程 × 5 次 = 30 次 CFI 触发全部 triggered=0**（100% 失败）！
+- slide=0x1d0000 正常、mm 泄漏正常、无超时警告——CFI 竞态根本没触发
+
+**定位**：v7（仅超时修复）2/2 triggered=1；v8 加 leak_memfd 时序（泄漏后 close）3/3 triggered=0；v9（v8+重试）30/30 triggered=0。**v8 的 leak_memfd 改动破坏了 CFI 触发**——泄漏时 mm_struct 存活干扰了后续 prepare_kernel_page 的 futex hash 碰撞/mm 泄漏结果（泄漏的 mm 地址/页类型变化），导致 CFI 触发竞态 100% 失败。
+
+**v10 修复**（commit ab6b852）：回退 pipe.c 的 leak_memfd 时序到泄漏前 close（v7 行为），**保留** v9 的 main.c CFI 重试（5 次/进程）。泄漏页类型问题（LRU 页）仍未解决，但先恢复 CFI 触发成功率，再处理泄漏页。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v10.apk`（payload md5 `f697e9fb`）。
