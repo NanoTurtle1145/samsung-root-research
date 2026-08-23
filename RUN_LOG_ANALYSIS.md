@@ -318,3 +318,24 @@ v4 与 v5 的 exploit payload **完全相同**（md5 14dc1c64），唯一差异�
 超时后返回失败，supervisor 继续下次尝试（配合 APP_FOPS_FRESH_PAGE_ATTEMPTS=5）。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v7.apk`（payload md5 `d73df0f6`）。
+
+---
+
+## 10. v7 日志 → v8 泄漏页类型修复（2026-08-23）
+
+**v7 日志**（`rootmys9280-SM-S9210(3).txt`，0823-1809）：
+- CFI 全部成功（triggered=1, cfi write/read ret=35, restoring misc_fops）——v6/v7 的 slide=0 防御和超时修复生效
+- gate 扫描 64 页：**泄漏页 idx=0 cache18=0（LRU 匿名页）**，idx=8-63 大量 cache18 非零（v4 放宽匹配后的误匹配页，非 pipe 对象）→ find_pipe_buffer 全失败 → `cache gate failed`
+- 两次尝试均如此
+
+**决定性对照**：
+| 日志 | 泄漏页 cache18 | 结果 |
+|---|---|---|
+| v4 成功 | **normal2k**（kmalloc-2k slab） | gate idx=0 命中 → root |
+| v1/v3/v5/v7 失败 | **0**（LRU/空闲页） | gate 全失败 |
+
+**根因**：泄漏目标是 **mm_struct**（futex hash 碰撞泄漏 leak_child 的 mm）。泄漏页是 mm_struct 所在 slab 页。DZF2 上 `close(leak_memfd)` 释放 mm 后页**保留在 SLUB partial**（cache18 仍 normal2k），pipe 对象（kmalloc-2k）分配时复用同页 → gate 命中。**BYH7(6.1.99) 上 close 后页立即回 buddy**（cache18=0）→ 泄漏页变 LRU 空闲页，pipe 对象从别处分配 → gate 找不到。
+
+**v8 修复**（commit a3f12e9）：`close(leak_memfd)` 从泄漏前移到泄漏后、pipe 对象（PIPE_RECLAIM）分配完成后。泄漏期间 mm_struct 存活在 kmalloc-2k slab（16 对象占 1 个，其余空闲可被 pipe_buffer 复用）→ 泄漏页保持 normal2k → gate 命中。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v8.apk`（payload md5 `754f7134`）。
