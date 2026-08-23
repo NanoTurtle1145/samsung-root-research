@@ -144,3 +144,69 @@ adb shell '/data/local/tmp/su -c id'
 - [GhostLock 4.19 README](https://raw.githubusercontent.com/yijiacloud/ghostlock-cve-2026-43499-4.19-k40/main/README.md)（原理）
 - [Black Hat: Two Bugs With One PoC](https://www.classcentral.com/course/youtube-two-bugs-with-one-poc-rooting-pixel-6-from-android-12-to-android-13-250998)（历史方案）
 - [Android 官方内核构建文档](https://source.android.com/docs/setup/build/building-kernels)（boot.img 提取与 vmlinux 构建）
+
+---
+
+## 九、Pixel 6 (AP4A.250205.002) 定标实测（2026-08-23）
+
+### 9.1 素材与提取
+
+- boot 镜像：`boot-pixel6.img`（64 MiB，Android bootimg header v4，kernel lz4_legacy）
+- 内核：`5.10.214-android13-4-00015-g54748cd9e76c-ab12786721`（Tensor G1 / GS101）
+- 解包：`magiskboot unpack` → kernel（24 MB 压缩 / 51.7 MB 解压）
+- 转 ELF：vmlinux-to-elf → `vmlinux_pixel6.elf`（59 MB，**145,588 符号**，基址 `ffffffc008000000`）
+- **BTF：无** → 结构体布局需反汇编恢复（与 aristotle 5.10 场景一致）
+
+### 9.2 已提取符号 RVA（相对 `KIMAGE_TEXT_BASE = ffffffc008000000`）
+
+| 符号 | RVA | 地址 |
+|---|---|---|
+| init_task | 0x000304c0c0 | ffffffc00b04c0c0 |
+| init_cred | 0x0003020b00 | ffffffc00b020b00 |
+| kmalloc_caches | 0x0002526038 | ffffffc00a526038 |
+| ashmem_fops | 0x00024d8e30 | ffffffc00a4d8e30 |
+| misc_fops | 0x000247f7b0 | ffffffc00a47f7b0 |
+| random_fops | 0x000247f550 | ffffffc00a47f550 |
+| urandom_fops | 0x000247f670 | ffffffc00a47f670 |
+| anon_pipe_buf_ops | 0x00023833e8 | ffffffc00a3833e8 |
+| nfulnl_logger | 0x0002f30d98 | ffffffc00af30d98 |
+| security_hook_heads | 0x0002522f10 | ffffffc00a522f10 |
+| selinux_state | 0x00031b69a0 | ffffffc00b1b69a0 |
+| selinux_blob_sizes | 0x00025252f0 | ffffffc00a5252f0 |
+| sysctl_bootid | 0x00031d2281 | ffffffc00b1d2281 |
+| root_task_group | 0x0003163a80 | ffffffc00b163a80 |
+| init_uts_ns | 0x00030a81c8 | ffffffc00b0a81c8 |
+| empty_zero_page | 0x000315f000 | ffffffc00b15f000 |
+| memstart_addr | 0x0002526028 | ffffffc00a526028 |
+| kimage_voffset | 0x0002526030 | ffffffc00a526030 |
+
+### 9.3 与 S24 DZF2 (6.1.145) 偏移对比
+
+| 符号 | Pixel 6 (5.10) RVA | S24 DZF2 (6.1) RVA | 差异 |
+|---|---|---|---|
+| init_task | 0x0304c0c0 | ~0x0224f8c0* | +0xdfc800 |
+| kmalloc_caches | 0x02526038 | 0x0176cbb8 | +0xdb9480 |
+| ashmem_fops | 0x024d8e30 | 0x013d1140 | +0x1107cf0 |
+| anon_pipe_buf_ops | 0x023833e8 | 0x01219d90* | +0x1169658 |
+
+> *DZF2 值取自 target.h；5.10 与 6.1 差异巨大，且 5.10 的 `rt_mutex_waiter` 为扁平布局（10 words vs 6.1 的 13 words），结构体偏移需按 5.10 源码重新核对——**不可套用 6.1 target.h 结构体常量**。
+
+### 9.4 待定标项（下一步）
+
+1. **结构体布局**（无 BTF，需反汇编 + 5.10 源码核对）：
+   - `rt_mutex_waiter`（扁平 10 words 布局）→ slide/fops 伪造表
+   - `task_struct`（cred / real_cred / pid 偏移）
+   - `pipe_buffer`（page/offset/len/ops 步长）
+   - `struct page`（size / compound_head / slab_cache / type 偏移）
+2. **物理内存常量**（Tensor GS101，需从 dts/abl 读取，不可套 MediaTek 0x40000000）：
+   - `P0_PHYS_OFFSET`（DRAM 物理基址）
+   - `P0_KERNEL_PHYS_LOAD`（内核物理加载地址）
+3. **exploit 工程选择**：推荐基于 [aristotle](https://github.com/soralis0912/CVE-2026-43499-aristotle) fork（同为 5.10 + Android 12 + MediaTek 无 BTF），改造 Pixel 6 target；或基于 [GhostLock-5.10](https://github.com/R0rt1z2/GhostLock-5.10)（有 karat/sunstone 多 target 结构）
+4. **编译参数**：API=31（Android 12）或 API=33/34（按实际系统，用户系统为 Android 15 → API 35，需验证 payload 兼容性）
+
+### 9.5 工作产物位置
+
+- `~/下载/boot-pixel6.img`（原始 boot 镜像）
+- `/home/nt/项目/pixel6_work/kernel`（解压内核）
+- `/home/nt/项目/pixel6_work/vmlinux_pixel6.elf`（含符号 ELF，59 MB）
+
