@@ -520,3 +520,18 @@ triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自�
 **v13 修复**（commit e8cf950）：回退 v11（SELINUX_ENFORCING_OFF 恢复 0x441），保留 v12 的 SLIDE_WAIT_NSEC=300ms。当前组合：CFI 300ms 窗口 + selinux 0x441 + CFI 重试 5 次 + 竞态超时 + late-load fallback。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v13.apk`（payload md5 `ad72be1d`）。
+
+---
+
+## 16. v13 日志 → v14 capability 修复（2026-08-24）
+
+**v13 日志**（`rootmys9280-SM-S9210(2).txt`，0824-1403）：
+- **root 全链路确认成功**：CFI 触发（300ms 窗口）→ 泄漏页 idx=0 normal2k match=1 → pipe probe found=1 idx=125 → read/write ok → read64 ok → **`root umh retval=0 socket=1`（SELinux permissive 生效，0x441 恢复正确）**
+- 日志在 root umh 后截断（疑似 root 后卡死/重启，或导出截断）
+- 另一个日志（`rootmys9280-SM-S9210 (2).txt`）是**错误载荷**（cve-2026-43499 = DZF2，label e3q-S9280ZCS6DZF2），非 BYH7 测试
+
+**遗留问题**（v10 模式）：late-load `unshare(CLONE_NEWNS) EACCES(13)` → ksud SIGKILL(137)。**permissive 已生效仍 EACCES → 非 SELinux，而是 capability**：Android usermodehelper 的 capability bounding set 可能缺 CAP_SYS_ADMIN，且 setresuid(0) 后 effective caps 被清空。
+
+**v14 修复**（commit 506b29f）：`umh_main` 在 setresuid(0,0,0) 后显式 `capset` 把 effective/permitted/inheritable 全置 1（受 bounding set 约束，尝试恢复 CAP_SYS_ADMIN）→ unshare/mount 应放行 → ksud 经 bind mount 或 fallback 正常加载 KernelSU。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v14.apk`（root helper md5 `ac55ba7f`，payload 同 v13 `ad72be1d`）。
