@@ -482,3 +482,20 @@ triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自�
 **v11 修复**（commit 8ba5c5f）：`SELINUX_ENFORCING_OFF → 0x02420440`，permissive 写入真正生效 → mount 放行 → ksud 正常加载 KernelSU。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v11.apk`（payload md5 `6e085548`）。
+
+---
+
+## 14. v11 日志 → v12 CFI 时序窗口修复（2026-08-24）
+
+**v11 日志**（`rootmys9280-SM-S9210 (1)(1).txt`，0824-1319）：
+- 6 进程 × 5 次 = **30 次 CFI 触发全部 triggered=0**，slide=0x100000 固定
+- v11 的 selinux 偏移修复（root.c）与 CFI 触发（slide_app.c）无关，未走到验证
+- 对比：v4/v10 CFI 1/1 成功（运气），v9/v11 30/30 失败 → **CFI 触发成功率随 boot 状态剧烈波动**
+
+**根因**：CFI 触发是 pselect/futex 竞态——waiter 线程 `FUTEX_WAIT_REQUEUE_PI` 的超时窗口（`SLIDE_WAIT_NSEC=50ms`）内，requeue 必须命中才能产生 EDEADLK。BYH7 上 50ms 窗口太窄（调度波动下常错过）→ requeue 找不到 waiter → 不 EDEADLK → triggered=0。
+
+**v12 修复**（commit 9cff70c）：
+- `slide_app.c`：`SLIDE_WAIT_NSEC`/`SLIDE_REQUEUE_MAX_POLLS`/`SLIDE_REQUEUE_POLL_USEC` 改 `#ifndef` 可覆盖
+- BYH7 `target.h`：`SLIDE_WAIT_NSEC=300ms`（6 倍窗口），requeue 命中率大幅提升
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v12.apk`（payload md5 `061153d5`）。
