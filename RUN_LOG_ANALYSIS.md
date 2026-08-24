@@ -499,3 +499,24 @@ triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自�
 - BYH7 `target.h`：`SLIDE_WAIT_NSEC=300ms`（6 倍窗口），requeue 命中率大幅提升
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v12.apk`（payload md5 `061153d5`）。
+
+---
+
+## 15. v12 日志 → v13 修正（2026-08-24）
+
+**v12 日志**（`rootmys9280-SM-S9210 (1)(2).txt` + `rootmys9280-SM-S9210(1).txt`，0824-1342）：
+- **CFI 触发成功**：2 次 `triggered=1`（v12 的 300ms 窗口生效！此前 v11 30/30 全失败）
+- attempt 4 全链路 pipe physrw 成功（read_ok=1 write_ok=1 rw64=1/1）
+- **但 root umh retval=-13（EACCES）socket=0**——root helper exec 被 SELinux 拒！
+
+**决定性对照**：
+| 版本 | SELINUX_ENFORCING_OFF | root umh 结果 |
+|---|---|---|
+| v10 | **0x441** | retval=0 socket=1（permissive 生效）|
+| v12 | 0x440（v11 改） | **retval=-13**（EACCES，exec 被拒）|
+
+**结论**：**0x441 才是 enforcing**（写 0 → permissive → UMH exec 放行）；**v11 改成 0x440 是错误修复**（写到了别的字段，permissive 失效）。之前 v11 基于"selinux_state+0"的反汇编推断方向反了——BYH7 的 enforcing 字段在 selinux_state+1（0x441）。
+
+**v13 修复**（commit e8cf950）：回退 v11（SELINUX_ENFORCING_OFF 恢复 0x441），保留 v12 的 SLIDE_WAIT_NSEC=300ms。当前组合：CFI 300ms 窗口 + selinux 0x441 + CFI 重试 5 次 + 竞态超时 + late-load fallback。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v13.apk`（payload md5 `ad72be1d`）。
