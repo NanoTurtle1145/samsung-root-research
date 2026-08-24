@@ -456,3 +456,29 @@ triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自�
    作为更强版本保留；v2.5.4 原版存档于标签 `v2.5.4-cza1-v1` / `cza1-v1-adapt`
 3. App 已加省电模式检测提示（commit e47044d）：dumpsys power 检测
    mPowerSaveMode=true 时输出警告，提示先关闭省电模式
+
+---
+
+## 13. v10 日志 → v11 SELinux enforcing 偏移修复（2026-08-24）
+
+**v10 日志**（`rootmys9280-SM-S9210.txt` 小 + `rootmys9280-SM-S9210 (6).txt` 大，0824-1240）：
+- **root 全链路成功**：泄漏页 idx=0 cache18=normal2k match=1、pipe probe found=1 idx=130、read64 ok、`triggered=1 verified=1 step=0`、**`uid=2000->0`**、`✔ 临时 root 已获得！`
+- **但 KernelSU late-load exit=137（SIGKILL）**：
+  ```
+  ksud late-load: exit=137
+  late-load: private mount namespace: Permission denied (unshare_errno=13)
+  ```
+- **unshare_errno=13（EACCES）≠ EPERM**——EACCES 是 **SELinux 拒绝**（缺 CAP 才是 EPERM）→ **SELinux permissive 写入未生效**！
+
+**反汇编验证（vmlinux-to-elf 提取三内核对比 enforcing 偏移）**：
+| 内核 | selinux_state 符号 | enforcing 偏移 | target.h | 结果 |
+|---|---|---|---|---|
+| CZA1（late-load 成功） | 0xffffffc00a421460 | **+0** | 0x02421460 ✅ | exit=0 |
+| DZF2（全链路成功） | 0xffffffc00a521588 | **+0** | 0x02521588 ✅ | root |
+| BYH7（失败） | 0xffffffc00a420440 | **+0** | **0x02420441 ❌（+1）** | exit=137 |
+
+**根因**：BYH7 的 `SELINUX_ENFORCING_OFF=0x02420441` **错 1 字节**——enforcing 是 selinux_state 首字段（+0），0x441 写到了 `initialized` 字段。`selinux_set_mnt_opts` 里 `ldarb [x8,#0x441]` 是 initialized 检查，非 enforcing。→ SELinux 从未 permissive → mount EACCES → ksud 被 SIGKILL(137) → **测试者反馈卡死重启**。
+
+**v11 修复**（commit 8ba5c5f）：`SELINUX_ENFORCING_OFF → 0x02420440`，permissive 写入真正生效 → mount 放行 → ksud 正常加载 KernelSU。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v11.apk`（payload md5 `6e085548`）。
