@@ -535,3 +535,27 @@ triggered=0 是竞态未命中，非崩溃——对比 (3).txt 曾有 panic 自�
 **v14 修复**（commit 506b29f）：`umh_main` 在 setresuid(0,0,0) 后显式 `capset` 把 effective/permitted/inheritable 全置 1（受 bounding set 约束，尝试恢复 CAP_SYS_ADMIN）→ unshare/mount 应放行 → ksud 经 bind mount 或 fallback 正常加载 KernelSU。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v14.apk`（root helper md5 `ac55ba7f`，payload 同 v13 `ad72be1d`）。
+
+---
+
+## 17. v15/v16 日志分析 — KDP mount panic 根因闭环（2026-08-24）
+
+**v15 测试**（`rootmys9280-SM-S9210 (2) (1).txt` / `(1)(1) (1).txt`，1824-1845）：
+- 修复内容：root umh 成功后提前 fork keeper（cve43499-hold 继承 pipe fd）+ nanosleep 1.5s 延迟
+- 结果：**黑屏重启不再立即发生**——`root early keeper` / `root umh settle done` 正常打印
+- 但 **settle done 后仍黑屏重启**：崩溃点在 `install_android_root` 的 holder 轮询期间
+  （root_hold_socket_ready 连接 cve43499_roothold abstract socket）
+- 另一日志 CFI triggered=0 5/5（slide=0x160000），触发率仍不稳
+
+**根因确定（v16）**：
+- v14 capset 提升 CAP_SYS_ADMIN 后，late-load 的 `unshare(CLONE_NEWNS)` + `mount` 真正执行
+- Samsung KDP 符号证实：`kdp_mnt_alloc_vfsmount` / `kdp_assign_mnt_flags` / `kdp_restrict_fork`
+  监控 mount namespace 操作 → 触发保护 → **内核 panic → 黑屏重启**
+- v4/v10（无 capset）unshare 返回 EACCES → fallback execl → 不 panic（但 late-load exit=10/137）
+- DZF2 成功日志（`S9280_DZF2_success.txt`）证实其路径本就是 fallback（unshare 失败 → exit=0）
+
+**v16 修复**（commit 63dfcc8）：`run_kernelsu_late_load` **跳过 unshare/mount，直连 execl** 阶段好的
+ksud（`/data/local/tmp/ksud-s25u-kdp`）。SELinux 已 permissive，/data/local/tmp 可执行。
+root helper md5 `4fe838b9`（原 ac55ba7f），payload 保持 v15 `f891c1ad`。
+
+**待验证**：`RootMyS24-debug-BYH7-pipe-gate-v16.apk`
