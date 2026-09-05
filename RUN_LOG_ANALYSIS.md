@@ -695,4 +695,4 @@ slide attempt 3 … sched_ok=1 sigalrm=1 setprio_ret=0 pkill_ret=0
    已反汇编，见 pixel6_work/rb_erase_disasm.txt）。
 
 新载荷 sha256 `664f400a4d20e06b4085c151b907c06f6c22ae3e50c3f247bb9d85fdadd74645`
-（88,608 B，0x400 定标 + KASLR root 源）。
+（88,608 B，0x400 定标 + KASLR root 源）。v2.1 更新 `8fe27e0c`（dmesg 缓冲 4MB）。
