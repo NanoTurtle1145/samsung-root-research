@@ -668,3 +668,31 @@ slide attempt 3 … sched_ok=1 sigalrm=1 setprio_ret=0 pkill_ret=0
 3. 【扫参收敛】shift 固定 0–5（6/7 放不下 deadline 词）；修复泄漏前无需跑满
    20 attempt（SLIDE_WAIT_SECONDS=2 下远超 60s launcher 窗口）。
 4. 【变体】MM_STRUCT_SZ 0x400 变体等 leak 原语修复后再做 A/B。
+
+### 18.6 真机诊断定标与两项修复（2026-09-05 22:58 diag）
+
+诊断文件 `pixel6-diag-20260905-225843.txt`（708 行，root，归档
+`02_exploit工程/pixel6-ghostlock/logs/2026-09-05/`）与 §18 失败特征闭环：
+
+1. **kallsyms 全 0**（连 uid=0/u:r:ksu:s0 都被 kptr 屏蔽）→ 符号定标只能信
+   vmlinux_pixel6.elf；真机泄漏不可依赖 /proc/kallsyms。
+2. **mm_struct slab：object_size=1000(0x3e8)、slab_size=1024(0x400)、order=3** →
+   KernelSnitch 扫描步长应为 0x400。**0x3e0 步长是 §18.2 "kernel page retry
+   12/12×3" 风暴的直接根因**（gcd=0x20，每 32 次扫描才对齐一次对象起点 → mm
+   碰撞必败 → page 准备 2-3 分钟/个）。已修：target.h + common.h MM_STRUCT_SZ
+   =0x400。
+3. **iomem：Kernel code 0x80000000-0x82caffff、System RAM 起 0x80000000** →
+   P0_PHYS_OFFSET/P0_KERNEL_PHYS_LOAD=0x80000000（delta=0）实锤；dmesg 无
+   panic；cpu 0-7 全在线（排除核数假设）。
+4. **KASLR root 源（绕过泄漏独立验证 direct 链）**：slide.c 新增
+   `SLIDE_P0_OFFSET` env + root dmesg `Kernel Offset: 0x<slide>` 自动解析
+   （klogctl SYS_syslog(3)），日志 `slide-kaslr-ok source=forced|dmesg`。
+   真机验证步骤：`USE_SU=1 ./pixel6-root.sh`（su -c 触发）→ 期望走到
+   `direct-root-summary`（cred 替换 + selinux 1->0），与 boot_id overlay 泄漏
+   解耦。
+5. **遗留**：非 root 场景 boot_id overlay 泄漏需 rb 旋转树形重设计
+   （SLIDE_LEAK_DISASM_ANALYSIS.md，__rb_erase_color VA 0xffffffc008a412a0
+   已反汇编，见 pixel6_work/rb_erase_disasm.txt）。
+
+新载荷 sha256 `664f400a4d20e06b4085c151b907c06f6c22ae3e50c3f247bb9d85fdadd74645`
+（88,608 B，0x400 定标 + KASLR root 源）。
