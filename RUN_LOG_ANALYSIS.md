@@ -559,3 +559,112 @@ ksud（`/data/local/tmp/ksud-s25u-kdp`）。SELinux 已 permissive，/data/local
 root helper md5 `4fe838b9`（原 ac55ba7f），payload 保持 v15 `f891c1ad`。
 
 **待验证**：`RootMyS24-debug-BYH7-pipe-gate-v16.apk`
+
+---
+
+## 18. Pixel 6 (oriole) 双载荷日志分析 — 触发(EDEADLK)成功但 5.10 泄漏原语失效（2026-09-05）
+
+日志归档：`02_exploit工程/pixel6-ghostlock/logs/2026-09-05/`（原始微信目录
+`~/文档/xwechat_files/wxid_h7qzzi5p3obc22_34b4/msg/file/2026-09/`）。
+
+### 18.1 三份文件与时间线
+
+| 文件 | 大小 | 导出时刻 | 内容 |
+|---|---|---|---|
+| `rootmys9280-Pixel_6.txt` | 3.0KB | 11:43 | 上午会话：pixel6 ×2 + pixel6-400 ×1，App 框架头正常、均走到「触发+熄屏」，但**无任何 preload 侧输出行**（未到可分析深度，可不再追） |
+| `rootmys9280-Pixel_6(1).txt` | 7.7KB | 13:55 | 下午第 1 轮（载荷 `libpreload.so` 87056B）中途导出，恢复 117 行 |
+| `rootmys9280-Pixel_6 (1).txt` | 17.3KB | 14:01 | 聚合日志：第 1 轮完整 + 第 2 轮（`libpreload-400.so` 87008B = **MM_STRUCT_SZ 0x400 变体**）启动段 + 历史会话残留 |
+
+时间戳换算：1787494518=08-23 22:15:18、1788254608=09-01 17:23:28、
+1788587226=09-05 13:47:06、1788587914=09-05 13:58:34（均为 CST）。
+
+环境（两轮一致）：Pixel 6 (oriole)，Android 15 / AP4A.250205.002，
+内核 `5.10.214-android13-4-00015-g54748cd9e76c-ab12786721`，KASLR on
+（verifiedbootstate=orange）。两次运行 boot_id 相同（05c1dee2-9339-4b77-90d7-cbc092373af1）
+→ **同一次开机内测试**。
+
+### 18.2 运行时序与失败特征（两个载荷变体一致）
+
+第 1 轮（payload=pixel6，13:47:06 起）：
+- startup / pipe 诊断正常（pipe-max-size=1MB、pipe-user-pages=16384）→ [2.6] 清理 exit=137（杀旧残留）。
+- **kernel page retry 高频失败**：13:47:10–13:50:08 三轮各 12/12（36 次）才出第一个好页 → attempt 3；attempt 4、6 的 prepare 也各烧 12 次。即**每 2 个 attempt 只有 1 个拿到 groomed page，单个 attempt 平均 2–3 分钟**——20 个 attempt 远超 launcher 60s 窗口（对照 §12 省电模式/核数 futex_hash 错位先例，建议确认 8 核全在线重测）。
+- 有输出的 attempt：attempt 3 (shift=2) 13:50:10、attempt 5 (shift=4) 13:52:41、attempt 7 (shift=6) 13:55:39（导出截断）。
+- 13:58:34 第 2 轮（pixel6-400）preload 启动（pid 6952），仅 startup 行，导出时仍在跑。
+
+attempt 3 全链关键行（attempt 5 完全同构）：
+```
+slide attempt 3 uses pselect shift=2
+slide child pid=14897 uid=0 direct_cpu=3
+slide CMP_REQUEUE_PI ret=-1 errno=35                    ← EDEADLK，见 §18.3
+slide pthread_kill(waiter, SIGALRM) ret=0
+slide pselect setup shift=2 page=ffffff88d0c08000 fake_lock=… fake_w0=… fake_task=…
+slide pselect before fd install nfds=320 / after fd install / before syscall
+slide consumer before tgkill tid=14898 / before sched
+slide pselect returned ret=0 errno=0 calls=1 sched_ok=0 last_sched_ret=-1
+slide consumer sched tid=14898 alive_ret=0 sched_ret=0 sched_errno=0    ← sched_setattr 成功
+slide boot_id raw=05c1dee293394b7790d7cbc092373af1 leaked=774b3993e2dec105
+[-] slide bad leaked pointer=774b3993e2dec105
+slide attempt 3 … sched_ok=1 sigalrm=1 setprio_ret=0 pkill_ret=0
+[-] slide attempt 3 failed n=96 status=256
+```
+
+要点：
+1. **errno=35 是 EDEADLK 不是 EAGAIN**（arm64 通用 errno：EAGAIN=11、EDEADLK=35）。全部 attempt 均为 -35 → 触发签名一致。
+2. `leaked=0x774b3993e2dec105` = boot_id 前 8 字节 `05c1dee293394b77` 的 LE u64；且该 16 字节是**完好的 v4 UUID**（byte6 高半 nibble=4、byte8 高两位=10）→ **boot_id 一个字节都没被改写**，泄漏写从未发生。
+3. attempt 7 (shift=6) 额外打出 `slide pselect cannot place deadline waiter_word=9 global_word=15 words_per_set=5 nfds=320`：shift≥6 时 waiter word9(deadline) 落到 global word15，超出 3×5 词窗口 → **shift 6/7 结构性不可用，扫它是纯浪费**。
+4. 全部 attempt `stext=0`、status=256（子进程 exit 1）→ 载荷循环 20 次全败，无 root。pselect ret=0（超时返回）与 waiter 按 2s 超时退出（werrno=110）均为设计内行为，非异常。
+
+### 18.3 反汇编定论（vmlinux_pixel6.elf，5.10.214-android13-4）
+
+1. **EDEADLK 是触发成功签名，不是环境错误。** `futex_requeue`
+   （VA 0xffffffc00827b8f8，Image off 0x27b8f8）全函数体没有任何 -35 物化点；
+   唯一来源是 `futex_proxy_trylock_atomic`（0xffffffc0082815b0）内联调用的
+   `futex_lock_pi_atomic`（0xffffffc0082805b0）经 requeue_pi 分支表
+   （`add w8,w21,#0x10; cmp #0x10; b.hi` → 表 @0xffffffc00a33e780 附近）透传。
+   lock_pi_atomic 的 -35 物化于 +0x278（VA 0xffffffc008280828）：
+   `and w8,w26,#0x3fffffff; cmp w8,w27; b.eq` —— 即 **uaddr2 词的 TID 位 ==
+   待 requeue 顶层 waiter 的 TID**（代理 trylock 的自死锁检查）。这正是
+   CVE-2026-43499「futex_requeue 代理锁回滚路径误用 current」要诱导的状态，
+   与 fusion/BYH7 线 §14-15 的判据（requeue 命中 → EDEADLK）一致。
+   → **dangling waiter / UAF 已武装**；对照其余返回值：requeue 路径 EAGAIN(-11)
+   唯一物化点 0xffffffc00827c1d0（cmpval 不匹配）、lock_pi_atomic 的 -11 只来自
+   cmpxchg 词值变化（0xffffffc008280778 / 0x…2807f0）——本日志全 -35 说明
+   cmpval=0 检查通过、uval 无并发改写，状态干净。
+2. **泄漏失败根因与 upstream 结论一致（b270dc6，XIG04 5.10.136）：**
+   flat rt_mutex_waiter 下当前 fake tree（parent=LOGGERS_0_1、rb_right=0、
+   rb_left=BOOT_ID）只会走出「单子树 rb_erase」路径——仅有
+   `__rb_change_child`（向父写 BOOT_ID）+ `rb_set_parent`（向 boot_id 写
+   LOGGERS 线性别名，即我们已放置的已知值），**永远不触发 rb 旋转**，运行时
+   `&nfulnl_logger`（泄漏目标）不可能被搬进 boot_id[0]。本日志 boot_id 全
+   attempt 字节不变即该结论在 Pixel 6 上的复现；sched_ok=1（walk 在 fake
+   waiter 上执行、未 panic）与之一致。
+   Pixel 6 5.10.214 对应符号（RVA = VA − 0xffffffc008000000）：
+   remove_waiter 0x1dd72c、rt_mutex_adjust_prio_chain 0x1ddce4、
+   rt_mutex_start_proxy_lock 0x1df4d0、futex_requeue 0x27b8f8、
+   futex_lock_pi_atomic 0x2805b0、rb_insert_color 0xa40db8、
+   **rb_erase 0xa40f54、__rb_erase_color 0xa412a0**（旋转本体，重建 overlay
+   前必须先逆这里）。
+3. **MM_STRUCT_SZ 0x3e0 vs 0x400 不是当前瓶颈**：400 变体（第 2 轮）与 3e0
+   变体失败在同一步（泄漏原语），与 mm 大小无关；400 变体本轮无判别力。
+
+### 18.4 与 S24/S25 线（6.1）成功路径的差异
+
+- 6.1 线（DZF2/BYH7/CZA1）成功链 = CFI 触发 → 泄漏页 → pipe probe → physrw →
+  root umh；其 rt_mutex_waiter 为 nested 布局，可构造引发旋转的两子树。
+- Pixel 6 = aristotle 直提权线（boot_id 泄漏 → KASLR → cred 替换 + SELinux
+  flip）；5.10 flat 布局下泄漏原语必须按 `SLIDE_LEAK_DISASM_ANALYSIS.md`
+  「次の一手」重建 fake tree 形状（使 rb_erase 进入旋转路径、把
+  `[loggers[0][1]]` 运行时值搬入 boot_id[0]）。**盲目 shift 扫在实机只会
+  no-op（其它机型会 panic），不要再扫。**
+
+### 18.5 下一步（优先级）
+
+1. 【代码】按 §18.3.2 用本 vmlinux 重做 `__rb_erase_color`/`__rb_change_child`
+   逆向 → 重设计 `prepare_skb_payload`/`put_direct_waiter` 的 fake tree
+   （PAGE_PAYLOAD_SLIDE），目标：rb_erase 走旋转路径、`[loggers[0][1]]` →
+   `boot_id[0]`。这是打通 KASLR 泄漏的唯一路径。
+2. 【验证环境】确认测试时 8 核全在线（关省电模式），对照 §12 futex_hash 错位
+   先例，压掉 kernel page retry 高失败率（13:47–13:50 三连 12/12）。
+3. 【扫参收敛】shift 固定 0–5（6/7 放不下 deadline 词）；修复泄漏前无需跑满
+   20 attempt（SLIDE_WAIT_SECONDS=2 下远超 60s launcher 窗口）。
+4. 【变体】MM_STRUCT_SZ 0x400 变体等 leak 原语修复后再做 A/B。
