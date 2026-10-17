@@ -1,16 +1,16 @@
 # S9280 免解锁 Root 研究资料索引
 
-> 整理时间：2026-08-17。按"研究阶段"归档，方便回看。
+> 整理时间：2026-08-17；最近更新：2026-10-18。按"研究阶段"归档，方便回看。
 
 ## 一、固件与内核（阶段 1）
 
-| 文件 | 说明 |
+| 文件（`01_固件内核/`） | 说明 |
 |---|---|
-| `s9280_port/boot_dzf2.img.lz4` | 从 AP 固件提取的 boot 分区原始镜像（22MB） |
-| `s9280_port/boot_dzf2.img` | 解压后的 boot 镜像（100MB，可用 magiskboot unpack） |
-| `s9280_port/kernel_dzf2_raw` | 解压后的内核映像（38MB，zImage 原始字节） |
-| `s9280_port/vmlinux_dzf2.elf` | **核心资产**：vmlinux-to-elf 恢复的 ELF，含全部符号（43MB） |
-| `s9280_port/p0_fingerprint_dzf2.h` | KASLR 滑动指纹（32 行 × 8 qword，设备验证 32/32） |
+| `boot_dzf2.img.lz4` | 从 AP 固件提取的 boot 分区原始镜像（22MB） |
+| `boot_dzf2.img` | 解压后的 boot 镜像（100MB，可用 magiskboot unpack） |
+| `kernel_dzf2_raw` | 解压后的内核映像（38MB，zImage 原始字节） |
+| `vmlinux_dzf2.elf` | **核心资产**：vmlinux-to-elf 恢复的 ELF，含全部符号（43MB） |
+| `p0_fingerprint_dzf2.h` | KASLR 滑动指纹（32 行 × 8 qword，设备验证 32/32） |
 
 固件版本：S9280ZCS6DZF2（One UI 8.5，2026-06），内核 `6.1.145-android14-11-3254743-abS9280ZCS6DZF2`。
 
@@ -81,24 +81,71 @@
 - **独立仓库**（补丁/脚本/构建）：<https://github.com/NanoTurtle1145/BakaSU-S9280>；App 集成：RootMyS24 v3.5.0-beta.185「BakaSU 内核（实验）」
 - **要点**：RKP 禁 live patch_text（触发 RAMDUMP）→ 回退 setresuid kretprobe + sucompat 地址级 kprobe；ksud 须在加载**前** staging 到 `/data/adb/ksud`；UAPI 按 4 上报对齐 rc3 管理器
 
+### 1d. 美版 SM-S926U1（S24+）DZE2 定标 + issue #10 修复 — 2026-10-17
+
+**触发**：issue #10 —— SM-S926U1（S926U1UES6DZE2）用港版 e3q DZE2 载荷连续
+`phys step cache gate failed` 9 次 + 触发失败 2 次，偶发自动重启。
+
+| 项 | 内容 |
+|---|---|
+| 素材 | `devices_ports/xaa_oneui8.5_dze2_boot.img`（boot sha256 `1d52c164…`，S926U1UES6DZE2） |
+| 内核 | `6.1.145-android14-11-33419968-abS926USQS6DZE2`（与港版 DZE2 **同构建号**） |
+| ELF | `devices_ports/dze2_xaa_unpacked/vmlinux_dze2_xaa.elf`（107,253 条符号） |
+| 结论 | 与港版全量符号对比：代码/数据符号 100% 同址；仅 7 项 `.rodata` 字符串常量偏移（-0x2e×6 / -0x6a×1） |
+| 关键重标 | `SLIDE_NFULNL_LOGGER_OFF`：港版 `0x016a61e6` → 美版 **`0x016a61b8`** |
+| P0 指纹 | 按美版原始 Image 重新生成；与港版 255/256 qword 相同、1 qword 不同 |
+| target | `02_exploit工程/fusion-s24u/src/targets/e2q-S926USQS6DZE2/`（本次新增） |
+| App | RootMyS24 **v3.5.0-beta.185**（2026-10-17）新增 `S926U1DZE2("cve-2026-43499-dze2-xaa", tested=false)`；定标报告见 App 仓库 `docs/dze2-xaa-target-complete.md` |
+| 状态 | beta 已发布；待 S926U1 真机反馈 |
+
+> issue #10 根因：港版/美版同构建号但 `.rodata` 字符串区整体差 0x2e，
+> 直接套用港版载荷会因 `nfnetlink_log` 标记偏移错误而无法完成 KASLR 定标/
+> 后续 pipe gate。适配不同 CSC/区域时必须按原始 Image 实测字符串偏移。
+
+### 1e. 韩版 SM-F741N（Z Flip 6）DZE1 内核分析 — 2026-10-18（暂不接入）
+
+| 项 | 内容 |
+|---|---|
+| 素材 | `/home/nt/下载/download.img`（= `boot.2.zip`/boot.img；`SM-F741N_KOR_KX_QKEY2`，Samsung 签名 2026-05-15） |
+| 内核 | `6.1.145-android14-11-33418572-abF741NKSS4DZE1`（构建号 33418572） |
+| ELF | `devices_ports/f741n_unpacked/vmlinux_f741n_dze1.elf`（107,253 条符号记录 / 103,520 个 name+type 键） |
+| vs 美版 S926U1 DZE2 | 仅 **2** 个 `.rodata` 局部字符串标签差 +0x2e（`task_index_to_char.state_char`、`zero_mask`）；代码/数据符号 100% 同址 |
+| vs 港版 S9280 DZE2 | **6** 个字符串标签差（-0x2e×5 / -0x3c×1，属美版↔港版偏移模式） |
+| nfnetlink_log | `0x016a61b8`（美版布局；港版 `0x016a61e6`） |
+| remove_waiter | `0x268` B / 154 条指令，三内核**逐字节相同**；漏洞写 `str xzr,[x20,#0x950]`（`x20=SP_EL0=current`）→ 清 `current->pi_blocked_on`；调用点覆盖 proxy-lock 活路径 → CVE 假设成立 |
+| P0 指纹 | 按 F741N Image 生成；与美版差 1 qword（`slide=0xa0000` 第 2 个：`0x9106d021…` vs `0x9105e021…`），与港版 256/256 相同 |
+| 编译验证 | draft target `b6q-F741NKSS4DZE1` 全链路构建通过（`cve-2026-43499-app.stable.so` 104,128 B） |
+| 报告/产物 | `devices_ports/f741n_dze1_analysis.md`、`devices_ports/f741n_dze1_draft/` |
+| 决策 | 2026-10-18：**暂不加入 App**（仅保留分析，备后续适配） |
+
 ## 二、Exploit 工程（阶段 3）
 
 | 路径 | 说明 |
 |---|---|
-| `s9280_port/fusion-s24u/` | exploit 源码工程（IonStack 参考实现的 S24 版） |
-| `.../src/targets/e3q-S9280ZCS6DZF2/target.h` | **S9280 适配配置**（修正的偏移/常量） |
-| `.../build/e3q-S9280ZCS6DZF2/cve-2026-43499-app.stable.so` | 最终载荷（104128B，App 内置） |
-| `.../build/e3q-S9280ZCS6DZF2/cve-2026-43499-root` | root helper（27072B，su_daemon） |
-| `s9280_port/fusion_s24u.tar.gz` | 工程打包备份 |
+| `02_exploit工程/fusion-s24u/` | exploit 源码工程（CVE-2026-43499，IonStack 参考实现的 S24 版） |
+| `.../src/targets/` | **12 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
+| `.../build/` | 已编译载荷（按 target 分目录；`*-app.stable.so` 104,128 B 为 App 侧载荷） |
+| `02_exploit工程/pipe_test.c` / `ksu_test.c` / `pipe_android61.c` | 设备端诊断工具（F_SETPIPE_SZ 配额 / KernelSU 驱动探测 / 6.1 pipe.c 对照） |
+| `02_exploit工程/dirtyfrag-s9280/` | DirtyFrag 引擎调研（6.1 系 MSG_SPLICE_PAGES 不可达，未采用） |
+| `02_exploit工程/fusion-s24u/work_W23_offsets/` | W23（5.10）定标实测数据与报告 |
+
+**已定标 target 摘要**（详细见 `02_exploit工程/fusion-s24u/src/targets/README.md`）：
+
+- `e3q-S9280ZCS6DZF2`（国行基线，**真机 ✅**）、`e3q-S9280ZHS6DZE2`（港版 DZE2，**真机 ✅**）
+- `e2q-S926USQS6DZE2`（**美版 S24+ DZE2，issue #10 修复**，App v3.5.0-beta.185 发布）
+- `e3q-S9280ZCS4CZA1` / `e3q-S9280ZHS4CZA1`（CZA1 国行/港版）、`e3q-S9280ZCS5CZB2`（CZB2）、
+  `e3q-S9280ZCS6DZG1`（DZG1，v2.5.6 起并入 DZF2 载荷）、`e3q-S9280ZCS6DZH3`（DZH3，KernelSU 3.3.0 + BakaSU 真机 ✅）
+- `e3q-S928USQS6DZF2`（美版 S24U 参考）、`e1q-S9210ZCU4BYH7`（One UI 7）、
+  `S9310ZCSCCZG1`（S25 / 6.6）、`cape-W9023ZCSAIZF1`（W23 / 5.10.236）
 
 ## 三、设备端诊断工具（阶段 4 排坑）
 
 | 文件 | 说明 |
 |---|---|
-| `s9280_port/pipe_test.c` + 二进制 | F_SETPIPE_SZ 行为诊断（配额/限制判定） |
-| `s9280_port/ksu_test.c` + 二进制 | KernelSU 驱动探测（reboot-magic syscall + ioctl） |
-| `s9280_port/pipe_android61.c` | Android 6.1 内核 pipe.c 源码（对照反汇编） |
-| `s9280_port/last_kmsg_panic.log` | **关键崩溃日志**：list_del BUG（worklist 竞态证据） |
+| `02_exploit工程/pipe_test.c` + 二进制 | F_SETPIPE_SZ 行为诊断（配额/限制判定） |
+| `02_exploit工程/ksu_test.c` + 二进制 | KernelSU 驱动探测（reboot-magic syscall + ioctl） |
+| `02_exploit工程/pipe_android61.c` | Android 6.1 内核 pipe.c 源码（对照反汇编） |
+| `01_固件内核/last_kmsg_panic.log` | **关键崩溃日志**：list_del BUG（worklist 竞态证据） |
 
 ## 四、参考研究（阶段 0）
 
@@ -119,9 +166,11 @@
 |---|---|
 | `~/sam85/tools/` | samloader（固件下载）、odin4（Thor 协议刷机，含 4 处本地修复）、magiskboot、adb |
 | `~/sam85/scripts/` | flash.sh / repack_kernel.sh / make_abl_only.sh 等 |
-| `s9280_port/android-ndk-r29/` | NDK r29（构建 payload / 诊断工具） |
-| `s9280_port/android-14/` | build-tools（apksigner） |
-| `s9280_port/s9280.keystore` | 签名密钥（pass: s9280root） |
+| `06_工具链/android-ndk-r29/` | NDK r29（构建 payload / 诊断工具） |
+| `06_工具链/android-14/` | build-tools（apksigner 等） |
+| `06_工具链/s9280.keystore` | 签名密钥（pass: s9280root） |
+| `06_工具链/platform-tools/` | adb / fastboot |
+| `06_工具链/vmlinux-to-elf/` | 内核 ELF 恢复工具 |
 
 ## 六、发布物
 
@@ -130,7 +179,11 @@
 | `~/AndroidStudioProjects/RootMyS9280/` | App 工程（v1.6，已开源） |
 | `s9280_port/modules/` | Zygisk-Next / LSPosed / KnoxPatch 模块 |
 | `s9280_port/blog_images/` + `blog_s9280_root.md` | 博客与配图 |
-| `s9280_port/KernelSU_v3.2.5_32525-release.apk` | KernelSU Manager（官方） |
+| `07_发布物/KernelSU_v3.2.5_32525-release.apk` | KernelSU Manager（官方） |
+| `07_发布物/RootMyS24-v3.5.0-beta.185.apk` | **RootMyS24 v3.5.0-beta.185**（2026-10-17）：BakaSU 实验内核 + 美版 S24+ DZE2 载荷 + KernelSU 3.3.0 |
+| `07_发布物/bakasu/` | BakaSU late-load 三星适配制品（ksud 35171 / root 守护进程 / 移植记录） |
+| `07_发布物/cve-2026-43499-czb2/` | CZB2 载荷归档 |
+| `07_发布物/run_logs/` | 运行日志归档（成功/失败样本） |
 
 ## 七、运行日志与适配分析
 
@@ -155,3 +208,7 @@
 8. **Shell 域 ≠ App 域**：提权逻辑在 Shell 域跑通不保证 App 域能通（SELinux/cgroup/seccomp 差异，cgroup 归属影响 kmalloc 缓存匹配）。BYH7 适配需在 App 域完整验证（源自 SM-S9380 移植经验）
 9. **boot quiet window 120 秒**是稳定成功的关键参数（`APP_MIN_BOOT_UPTIME_SEC=120`），fusion-s24u 已是此值；不要为省时间改小（实测 60 秒必失败，120 秒一轮秒杀）
 10. **BakaSU（ReSukiSU 系）三星适配版可在 S9280/DZH3 late-load**（2026-10-17 真机验证）：KDP task-scoped RO cred + DEFEX kprobe + RKP 禁 live patch_text（回退 setresuid kretprobe / sucompat 地址级 kprobe）；ksud 须在加载前 staging 到 `/data/adb/ksud`；UAPI 强制按 4 上报对齐 rc3 管理器。见 `devices_ports/dzh3_bakasu_late_load.md`
+11. **同一构建号 ≠ 同一字符串布局**：S9280 TGY 与 S926U1 XAA 同为 33419968，代码/数据符号一致，但 `.rodata` 字符串区整体差 0x2e（`nfnetlink_log` 0x016a61e6 vs 0x016a61b8）→ 跨 CSC/区域适配必须按原始 Image 实测字符串偏移，不能直接复用载荷（issue #10 根因）
+12. **美版 S24+（e2q）已独立定标**：target `e2q-S926USQS6DZE2`；App v3.5.0-beta.185 起内置独立载荷 `cve-2026-43499-dze2-xaa`
+13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；draft target 与 104,128 B 载荷已构建验证，2026-10-18 决定**暂不接入**
+14. **BakaSU 独立仓库**：<https://github.com/NanoTurtle1145/BakaSU-S9280>（per-boot 脚本 + 三星补丁 + DDK 构建）；App v3.5.0-beta.185 起提供「BakaSU 内核（实验）」开关
