@@ -3,6 +3,9 @@
 > 报告日期：2026-08-22
 > 目标设备：S9280ZCS6DZG1（国行 S9280, One UI 8.5, kernel 6.1.145-android14-11-3254743）
 > 方案来源：https://github.com/ReSukiSU/ReSukiSU（基于 SukiSU-Ultra → KernelSU）
+>
+> **后续落地（2026-10-17）**：BakaSU（ReSukiSU 系 + 三星 KDP/RKP/DEFEX 适配）已在 SM-S9280 / DZH3 真机验证成功（late-load，不写 boot）。
+> 结果、制品与限制见 `dzh3_bakasu_late_load.md`；补丁/脚本见 <https://github.com/NanoTurtle1145/BakaSU-S9280>。
 
 ---
 
