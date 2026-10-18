@@ -1,7 +1,7 @@
 # SM-F741N（韩版 Galaxy Z Flip 6）DZE1 内核分析报告
 
 > 日期：2026-10-18
-> 状态：**分析完成，暂不接入**（2026-10-18 决定：韩版折叠机型先不加入 App，仅保留分析存档）
+> 状态：**已定标并接入**（2026-10-18：先判暂缓、同日确认接入 —— 正式 target `src/targets/b6q-F741NKSS4DZE1/`、App 载荷 `cve-2026-43499-F741NKSS4DZE1`、专属 KernelSU 3.3.0 驱动 `ksud-f741n-32601`，条目 `F741NDZE1`；服务端 `payloads.json` 条目已配置（`tested=false`、minVc=186），待真机验证）
 > 素材：`/home/nt/下载/download.img`（= `boot.2.zip` 内 `boot.img`，
 > `SM-F741N_KOR_KX_QKEY2`，Samsung 签名 2026-05-15 16:00:43）
 > 参考：美版 S926U1 DZE2（`e2q-S926USQS6DZE2`，已定标 issue #10）、
@@ -217,7 +217,7 @@ TARGET=b6q-F741NKSS4DZE1 ANDROID_NDK_HOME=.../android-ndk-r29 \
    - 补 `BUILD_FINGERPRINT`（待用户提供 `getprop ro.build.fingerprint`）；
    - **无需修改任何 `*_OFF`**（含 `SLIDE_NFULNL_LOGGER_OFF = 0x016a61b8`）。
    已按此生成 draft：`devices_ports/f741n_dze1_draft/target.h.draft`。
-3. **出载荷**（待决策）：载荷**已预先构建并通过尺寸校验**
+3. **出载荷**（已采纳）：载荷**已预先构建并通过尺寸校验**
    （`devices_ports/f741n_dze1_draft/cve-2026-43499-app.stable.so`，104,128 B）；
    App 侧只需增加 FirmwareVersion 条目 + 把该文件放进 assets；
    KMI 为 `android14-6.1`，复用现有 6.1 ksud 资产。

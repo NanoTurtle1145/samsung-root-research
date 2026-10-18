@@ -102,7 +102,7 @@
 > 直接套用港版载荷会因 `nfnetlink_log` 标记偏移错误而无法完成 KASLR 定标/
 > 后续 pipe gate。适配不同 CSC/区域时必须按原始 Image 实测字符串偏移。
 
-### 1e. 韩版 SM-F741N（Z Flip 6）DZE1 内核分析 — 2026-10-18（暂不接入）
+### 1e. 韩版 SM-F741N（Z Flip 6）DZE1 定标与接入 — 2026-10-18（待真机验证）
 
 | 项 | 内容 |
 |---|---|
@@ -114,16 +114,16 @@
 | nfnetlink_log | `0x016a61b8`（美版布局；港版 `0x016a61e6`） |
 | remove_waiter | `0x268` B / 154 条指令，三内核**逐字节相同**；漏洞写 `str xzr,[x20,#0x950]`（`x20=SP_EL0=current`）→ 清 `current->pi_blocked_on`；调用点覆盖 proxy-lock 活路径 → CVE 假设成立 |
 | P0 指纹 | 按 F741N Image 生成；与美版差 1 qword（`slide=0xa0000` 第 2 个：`0x9106d021…` vs `0x9105e021…`），与港版 256/256 相同 |
-| 编译验证 | draft target `b6q-F741NKSS4DZE1` 全链路构建通过（`cve-2026-43499-app.stable.so` 104,128 B） |
-| 报告/产物 | `devices_ports/f741n_dze1_analysis.md`、`devices_ports/f741n_dze1_draft/` |
-| 决策 | 2026-10-18：**暂不加入 App**（仅保留分析，备后续适配） |
+| 编译验证 | 正式 target `src/targets/b6q-F741NKSS4DZE1/` 构建通过（与 draft 逐字节一致）；App 载荷 `cve-2026-43499-F741NKSS4DZE1` 104,128 B；专属驱动 `ksud-f741n-32601`（KSU 3.3.0 / 32601，vermagic 逐字节匹配） |
+| 报告/产物 | `devices_ports/f741n_dze1_analysis.md`、`devices_ports/f741n_dze1_draft/`、`02_exploit工程/fusion-s24u/src/targets/b6q-F741NKSS4DZE1/` |
+| 决策 | 2026-10-18：**已接入 App**（条目 `F741NDZE1`，韩版分组；服务端清单条目已配置：`tested=false`、minVc=186，验证通过后远端翻转；待真机验证） |
 
 ## 二、Exploit 工程（阶段 3）
 
 | 路径 | 说明 |
 |---|---|
 | `02_exploit工程/fusion-s24u/` | exploit 源码工程（CVE-2026-43499，IonStack 参考实现的 S24 版） |
-| `.../src/targets/` | **12 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
+| `.../src/targets/` | **13 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
 | `.../build/` | 已编译载荷（按 target 分目录；`*-app.stable.so` 104,128 B 为 App 侧载荷） |
 | `02_exploit工程/pipe_test.c` / `ksu_test.c` / `pipe_android61.c` | 设备端诊断工具（F_SETPIPE_SZ 配额 / KernelSU 驱动探测 / 6.1 pipe.c 对照） |
 | `02_exploit工程/dirtyfrag-s9280/` | DirtyFrag 引擎调研（6.1 系 MSG_SPLICE_PAGES 不可达，未采用） |
@@ -210,5 +210,5 @@
 10. **BakaSU（ReSukiSU 系）三星适配版可在 S9280/DZH3 late-load**（2026-10-17 真机验证）：KDP task-scoped RO cred + DEFEX kprobe + RKP 禁 live patch_text（回退 setresuid kretprobe / sucompat 地址级 kprobe）；ksud 须在加载前 staging 到 `/data/adb/ksud`；UAPI 强制按 4 上报对齐 rc3 管理器。见 `devices_ports/dzh3_bakasu_late_load.md`
 11. **同一构建号 ≠ 同一字符串布局**：S9280 TGY 与 S926U1 XAA 同为 33419968，代码/数据符号一致，但 `.rodata` 字符串区整体差 0x2e（`nfnetlink_log` 0x016a61e6 vs 0x016a61b8）→ 跨 CSC/区域适配必须按原始 Image 实测字符串偏移，不能直接复用载荷（issue #10 根因）
 12. **美版 S24+（e2q）已独立定标**：target `e2q-S926USQS6DZE2`；App v3.5.0-beta.185 起内置独立载荷 `cve-2026-43499-dze2-xaa`
-13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；draft target 与 104,128 B 载荷已构建验证，2026-10-18 决定**暂不接入**
+13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；2026-10-18 正式定标并接入 App（条目 `F741NDZE1` + 专属 KSU 3.3.0 驱动 `ksud-f741n-32601`），待真机验证
 14. **BakaSU 独立仓库**：<https://github.com/NanoTurtle1145/BakaSU-S9280>（per-boot 脚本 + 三星补丁 + DDK 构建）；App v3.5.0-beta.185 起提供「BakaSU 内核（实验）」开关

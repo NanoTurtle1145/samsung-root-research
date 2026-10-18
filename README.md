@@ -26,7 +26,7 @@ samsung_root_research/
 ├── 02_exploit工程/           # CVE-2026-43499 利用工程
 │   ├── fusion-s24u/          # 主 exploit（C，NDK 构建）
 │   │   ├── src/              # main.c / pipe.c / slide.c / root.c / su_daemon.c …
-│   │   ├── src/targets/      # 12 个已定标 target（附 README 索引）
+│   │   ├── src/targets/      # 13 个已定标 target（附 README 索引）
 │   │   └── build/            # 各 target 已编译载荷（*-app.stable.so 104,128 B）
 │   ├── dirtyfrag-s9280/      # DirtyFrag 引擎调研
 │   └── pipe_test.c / ksu_test.c / pipe_android61.c
@@ -72,7 +72,7 @@ samsung_root_research/
 | S9210ZCU4BYH7（国行 One UI 7） | SM-S9210 | 6.1.99 | ✅ 已定标，待真机反馈 |
 | S9310ZCSCCZG1（国行 S25） | SM-S9310 | 6.6 系列 | ✅ 已定标（App 内置） |
 | W9023ZCSAIZF1（W23 / Fold4） | SM-W9023N | 5.10.236 | ✅ 定标 + 编译通过（2026-10-02），待真机 |
-| F741NKSS4DZE1（韩版 Z Flip 6） | SM-F741N | 6.1.145 / 33418572 | 🔍 仅内核分析（**暂不接入**） |
+| `F741NKSS4DZE1`（韩版 Z Flip 6） | SM-F741N | 6.1.145 / 33418572 | ✅ 已定标 + 载荷交付（App `F741NDZE1`，KSU 3.3.0），待真机验证 |
 | Pixel 6（Android 15） | oriole | 5.10.214 | ✅ 已定标 + 载荷交付，待真机验证 |
 
 > 另有 **BakaSU late-load 路线**（不刷 boot、不动 Knox）：在 S9280/DZH3 上通过
@@ -88,9 +88,11 @@ samsung_root_research/
 - **2026-10-17**：**BakaSU late-load 三星适配**（KDP/RKP/DEFEX）在 DZH3 真机验证通过；
   RootMyS24 增加「BakaSU 内核（实验）」开关；独立仓库
   [BakaSU-S9280](https://github.com/NanoTurtle1145/BakaSU-S9280)（per-boot 脚本 + 补丁 + DDK 构建）。
-- **2026-10-18**：韩版 F741N（Z Flip 6）DZE1 内核分析完成 —— 与美版 S24+ 布局几乎全等
-  （103,520 个符号仅 2 个 `.rodata` 标签差），target 草案与载荷已构建验证；
-  决定**暂不接入**，分析留档 `devices_ports/f741n_dze1_analysis.md`。
+- **2026-10-18**：韩版 F741N（Z Flip 6）DZE1 定标并接入 —— 与美版 S24+ 布局几乎全等
+  （103,520 个符号仅 2 个 `.rodata` 标签差）；正式 target `b6q-F741NKSS4DZE1`、
+  App 载荷 `cve-2026-43499-F741NKSS4DZE1` 与专属 KernelSU 3.3.0（32601）驱动
+  `ksud-f741n-32601` 交付 App（条目 `F741NDZE1`），待真机验证；
+  分析报告 `devices_ports/f741n_dze1_analysis.md`。
 - **2026-10-02**：W23（SM-W9023N / cape / 5.10.236）定标完成并编译通过。
 - **2026-09**：Pixel 6（5.10.214）跨平台适配交付（载荷 + 诊断工具 + App）。
 
@@ -106,7 +108,7 @@ samsung_root_research/
   issue #10 的 `cache gate` 失败根因，跨 CSC 适配必须按原始 Image 实测字符串偏移
 - **BakaSU 三星适配要点**：KDP task-scoped cred、DEFEX kprobe、RKP 禁 live patch_text
   （回退 setresuid kretprobe + sucompat 地址级 kprobe）、ksud 加载前 staging、UAPI 4 对齐
-- **F741N（韩版 Flip6）≈ 美版 S24+**：布局几乎全等，可作为后续适配储备
+- **F741N（韩版 Flip6 DZE1）≈ 美版 S24+**：布局几乎全等，已按美版模板定标并接入 App（待真机验证）
 
 
 ### 文档导航
@@ -118,9 +120,9 @@ samsung_root_research/
 | [RUN_LOG_ANALYSIS.md](./RUN_LOG_ANALYSIS.md) | 成功/失败日志逐行对比与失败特征判读 |
 | [RESEARCH_INDEX.md](./RESEARCH_INDEX.md) | 研究资料全量索引 |
 | [devices_ports/README.md](./devices_ports/README.md) | 机型素材 / 解包内核 / 定标与分析报告索引 |
-| [02_exploit工程/fusion-s24u/src/targets/README.md](./02_exploit工程/fusion-s24u/src/targets/README.md) | 12 个已定标 target 一览（机型/固件/内核/状态） |
+| [02_exploit工程/fusion-s24u/src/targets/README.md](./02_exploit工程/fusion-s24u/src/targets/README.md) | 13 个已定标 target 一览（机型/固件/内核/状态） |
 | [devices_ports/dzh3_bakasu_late_load.md](./devices_ports/dzh3_bakasu_late_load.md) | BakaSU late-load 三星适配落地记录（真机验证） |
-| [devices_ports/f741n_dze1_analysis.md](./devices_ports/f741n_dze1_analysis.md) | F741N（韩版 Flip6）DZE1 内核分析（暂不接入） |
+| [devices_ports/f741n_dze1_analysis.md](./devices_ports/f741n_dze1_analysis.md) | F741N（韩版 Flip6）DZE1 内核分析 / 定标报告（已接入，待真机验证） |
 | [03_参考研究/SM-S9380_RMG_root_experience.md](./03_参考研究/SM-S9380_RMG_root_experience.md) | SM-S9380 实战经验（boot quiet window / struct page 偏移 / Shell-App 域差异） |
 
 ---
