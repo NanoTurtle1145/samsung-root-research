@@ -1,7 +1,7 @@
 # SM-S928B（欧版 S24 Ultra）EZIF 内核分析报告
 
 > 日期：2026-10-18
-> 状态：**定标完成、draft 已构建，待真机验证**
+> 状态：**定标完成，载荷与专属驱动已随 beta v3.5.1-beta.203 发布（2026-10-18），待真机验证**
 > （正式 target `e3q-S928BXXU6EZIF`；App 载荷 `cve-2026-43499-app.stable.so` 104,128 B 已就绪）
 > 素材：`/home/nt/下载/S24Ultra Europe One UI 9.0.zip`
 > （zip sha256 `f2239fe2c8fa639545f382e68ae0de744d769df95e9b6ecc3c932f44b70324d4`；
@@ -133,6 +133,23 @@ TARGET=e3q-S928BXXU6EZIF ANDROID_NDK_HOME=.../android-ndk-r29 make stable all
 - `target.h` sha256 `320b113d565f4bc24ec71d599cd9b74c227ef5530d408ee25ce55c68314793b9`
   （draft 与正式 target 逐字节一致）。
 
+### 7.1 KernelSU 专属驱动（3.3.0 / 32601）
+
+按 F741N 先例走 DDK 重建管线（`adapt-ksu.sh EZIF vmlinux_ezif.elf android14-6.1`：
+目标内核 Module.symvers / vermagic 注入，绝不覆盖官方 Manager 的哈希与尺寸校验）：
+
+| 产物 | 大小 | sha256 |
+|---|---|---|
+| `kernelsu-EZIF.ko`（内核模块） | 404,840 B | `7973e28bff2a04aa2c9d4e9692307dd7a7999cf3833dd9e3d3fef6fe3066795a` |
+| `ksud-ezif-32601`（内嵌驱动的 ksud，App 资产） | 5,107,192 B | `51881cdd113adb80cf00e18669ebb8a8fa4af00c27ae4a9a88ad7fdc704c00fe` |
+
+- vermagic 与真机逐字节一致：`6.1.162-android14-11-34343818-abS928BXXU6EZIF SMP preempt mod_unload modversions aarch64`；
+- 静态审计（RMG `audit_module_against_target.py --manual-relocation`）：未定义符号 202 /
+  缺失 0 / kallsyms 解析 70 / CRC 不一致 0；与 F741N 专属模块节级对比仅 `.modinfo`、
+  build-id 两节不同，与已发货 DZF2/DZH3 模块对比另加 `.symtab` 少量字节差异；
+- 内嵌模块校验、版本常量（32601 / 3.3.0）、官方 Manager 哈希（`c371061b…`）全部通过；
+- 本机型无 3.2.5 驱动回退（vermagic 与任何既有 ksud 均不同）。
+
 ## 8. 结论与建议
 
 1. **定标完成**：EZIF 是 S24 系首个 One UI 9.0 / 6.1.162 目标；与港版同平台同 KMI，
@@ -141,10 +158,10 @@ TARGET=e3q-S928BXXU6EZIF ANDROID_NDK_HOME=.../android-ndk-r29 make stable all
    成功判据见指南 §8.3，失败按 §8.4 分类。建议顺手采集：
    - `getprop ro.build.fingerprint`（回填 target 元数据，当前为占位 TODO）；
    - `cat /sys/kernel/tracing/events/sched/sched_blocked_reason/id`（复核 106）。
-3. **接入（待决策）**：App `FirmwareVersion` 条目（资产名建议 `cve-2026-43499-ezif`）、
-   服务端 `payloads.json`（tested=false）、KernelSU 驱动——**EZIF vermagic 与现有
-   `ksud-selected` / `ksud-f741n-32601` 均不同，需按 F741N 先例构建专属驱动**
-   （或评估 BakaSU late-load 路线），该工作量单独立项。
+3. **接入（已完成）**：App `FirmwareVersion` 条目 `S928BEZIF`（资产
+   `cve-2026-43499-S928BXXU6EZIF`，外版分组、tested=false）、服务端 `payloads.json`
+   （tested=false、ksu `ksud-ezif-32601`、minVc=202）、专属驱动按 F741N 先例构建（见 §7.1）——
+   已随 **beta v3.5.1-beta.203（2026-10-18）** 发布；真机验证通过后翻转 tested。
 4. **风险**：内核跨代（17 个 LTS 版本）但 CVE 链结构经指令级核查未变；
    真机失败时优先按指南 §8.4「偏移不匹配」分支排查并回报完整日志。
 
