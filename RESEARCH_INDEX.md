@@ -96,13 +96,13 @@
 | P0 指纹 | 按美版原始 Image 重新生成；与港版 255/256 qword 相同、1 qword 不同 |
 | target | `02_exploit工程/fusion-s24u/src/targets/e2q-S926USQS6DZE2/`（本次新增） |
 | App | RootMyS24 **v3.5.0-beta.185**（2026-10-17）新增 `S926U1DZE2("cve-2026-43499-dze2-xaa", tested=false)`；定标报告见 App 仓库 `docs/dze2-xaa-target-complete.md` |
-| 状态 | beta 已发布；待 S926U1 真机反馈 |
+| 状态 | 定标完成；**未纳入 RootMyS24 v3.5.1**（尚无真机实测，验证后再发布） |
 
 > issue #10 根因：港版/美版同构建号但 `.rodata` 字符串区整体差 0x2e，
 > 直接套用港版载荷会因 `nfnetlink_log` 标记偏移错误而无法完成 KASLR 定标/
 > 后续 pipe gate。适配不同 CSC/区域时必须按原始 Image 实测字符串偏移。
 
-### 1e. 韩版 SM-F741N（Z Flip 6）DZE1 定标与接入 — 2026-10-18（待真机验证）
+### 1e. 韩版 SM-F741N（Z Flip 6）DZE1 定标与接入 — 2026-10-18 真机验证通过
 
 | 项 | 内容 |
 |---|---|
@@ -116,7 +116,7 @@
 | P0 指纹 | 按 F741N Image 生成；与美版差 1 qword（`slide=0xa0000` 第 2 个：`0x9106d021…` vs `0x9105e021…`），与港版 256/256 相同 |
 | 编译验证 | 正式 target `src/targets/b6q-F741NKSS4DZE1/` 构建通过（与 draft 逐字节一致）；App 载荷 `cve-2026-43499-F741NKSS4DZE1` 104,128 B；专属驱动 `ksud-f741n-32601`（KSU 3.3.0 / 32601，vermagic 逐字节匹配） |
 | 报告/产物 | `devices_ports/f741n_dze1_analysis.md`、`devices_ports/f741n_dze1_draft/`、`02_exploit工程/fusion-s24u/src/targets/b6q-F741NKSS4DZE1/` |
-| 决策 | 2026-10-18：**已接入 App**（条目 `F741NDZE1`，韩版分组；服务端清单条目已配置：`tested=false`、minVc=186，验证通过后远端翻转；待真机验证） |
+| 决策 | 2026-10-18：**已接入 App 并真机验证通过**（beta.191 / issue #16）；v3.5.1 起 `tested=true` 正式发布；服务端 `payloads.json` 已同步翻转 |
 
 ## 二、Exploit 工程（阶段 3）
 
@@ -180,7 +180,8 @@
 | `s9280_port/modules/` | Zygisk-Next / LSPosed / KnoxPatch 模块 |
 | `s9280_port/blog_images/` + `blog_s9280_root.md` | 博客与配图 |
 | `07_发布物/KernelSU_v3.2.5_32525-release.apk` | KernelSU Manager（官方） |
-| `07_发布物/RootMyS24-v3.5.0-beta.185.apk` | **RootMyS24 v3.5.0-beta.185**（2026-10-17）：BakaSU 实验内核 + 美版 S24+ DZE2 载荷 + KernelSU 3.3.0 |
+| `07_发布物/RootMyS24-v3.5.1-release.apk` | **RootMyS24 v3.5.1**（2026-10-18，48,201,754 B，sha256 `54292ce5…`）：韩版 Z Flip6 正式支持 + BakaSU 实验内核 + KernelSU 3.3.0；美版 S24+ DZE2 载荷未包含 |
+| `07_发布物/RootMyS24-v3.5.0-beta.185.apk` | RootMyS24 v3.5.0-beta.185（2026-10-17）：BakaSU 实验内核 + 美版 S24+ DZE2 载荷（该载荷未进入 v3.5.1） |
 | `07_发布物/bakasu/` | BakaSU late-load 三星适配制品（ksud 35171 / root 守护进程 / 移植记录） |
 | `07_发布物/cve-2026-43499-czb2/` | CZB2 载荷归档 |
 | `07_发布物/run_logs/` | 运行日志归档（成功/失败样本） |
@@ -210,5 +211,5 @@
 10. **BakaSU（ReSukiSU 系）三星适配版可在 S9280/DZH3 late-load**（2026-10-17 真机验证）：KDP task-scoped RO cred + DEFEX kprobe + RKP 禁 live patch_text（回退 setresuid kretprobe / sucompat 地址级 kprobe）；ksud 须在加载前 staging 到 `/data/adb/ksud`；UAPI 强制按 4 上报对齐 rc3 管理器。见 `devices_ports/dzh3_bakasu_late_load.md`
 11. **同一构建号 ≠ 同一字符串布局**：S9280 TGY 与 S926U1 XAA 同为 33419968，代码/数据符号一致，但 `.rodata` 字符串区整体差 0x2e（`nfnetlink_log` 0x016a61e6 vs 0x016a61b8）→ 跨 CSC/区域适配必须按原始 Image 实测字符串偏移，不能直接复用载荷（issue #10 根因）
 12. **美版 S24+（e2q）已独立定标**：target `e2q-S926USQS6DZE2`；App v3.5.0-beta.185 起内置独立载荷 `cve-2026-43499-dze2-xaa`
-13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；2026-10-18 正式定标并接入 App（条目 `F741NDZE1` + 专属 KSU 3.3.0 驱动 `ksud-f741n-32601`），待真机验证
+13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；2026-10-18 正式定标并接入 App（条目 `F741NDZE1` + 专属 KSU 3.3.0 驱动 `ksud-f741n-32601`），beta.191 真机验证通过（issue #16），v3.5.1 正式发布
 14. **BakaSU 独立仓库**：<https://github.com/NanoTurtle1145/BakaSU-S9280>（per-boot 脚本 + 三星补丁 + DDK 构建）；App v3.5.0-beta.185 起提供「BakaSU 内核（实验）」开关

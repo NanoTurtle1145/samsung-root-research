@@ -18,7 +18,7 @@
 | `chc_oneui8.5_dzg1_boot.img` | S24 全系国行 CHC | S9280ZCS6DZG1 | 6.1.145 | One UI 8.5；v2.5.6 起并入 DZF2 载荷 |
 | `tgy_oneui8.5_dze2_boot.img` | S24 全系港版 TGY | S9280ZHS6DZE2 | 6.1.145 / 33419968 | **真机验证成功**（2026-08-22） |
 | `xaa_oneui8.5_dze2_boot.img` | **SM-S926U1 美版 S24+ XAA** | S926U1UES6DZE2 | 6.1.145 / 33419968 | **issue #10 修复**；e2q target；App v3.5.0-beta.185 已发布 |
-| `kss_oneui8.5_dze1_boot.img` | **SM-F741N 韩版 Z Flip 6 KSS** | F741NKSS4DZE1 | 6.1.145 / 33418572 | 已定标并接入（`b6q-F741NKSS4DZE1` / App `F741NDZE1`），待真机验证 |
+| `kss_oneui8.5_dze1_boot.img` | **SM-F741N 韩版 Z Flip 6 KSS** | F741NKSS4DZE1 | 6.1.145 / 33418572 | ✅ 已定标并接入（`b6q-F741NKSS4DZE1` / App `F741NDZE1`），beta.191 真机验证通过（issue #16），v3.5.1 正式支持 |
 
 > 注：`download.img`（`/home/nt/下载/`）= `boot.2.zip` 内 boot.img = SN-F741N
 > 韩国固件的 boot 分区；Samsung 签名信息 `SM-F741N_KOR_KX_QKEY2`。
@@ -33,7 +33,7 @@
 | `dzg1_unpacked/` | S9280 CN DZG1：kernel + `vmlinux_dzg1.elf` | — | 并入 DZF2 载荷 |
 | `dze2_unpacked/` | **S9280 HK DZE2**：`kernel` + `vmlinux_dze2.elf` | 107,253 条 | ✅ 真机验证 |
 | `dze2_xaa_unpacked/` | **S926U1 US S24+ DZE2**：`kernel` + `vmlinux_dze2_xaa.elf` | 107,253 条 | ✅ 定标（issue #10） |
-| `f741n_unpacked/` | **F741N KR Z Flip6 DZE1**：`kernel` + `vmlinux_f741n_dze1.elf` | 107,253 条 | ✅ 已定标并接入，待真机验证 |
+| `f741n_unpacked/` | **F741N KR Z Flip6 DZE1**：`kernel` + `vmlinux_f741n_dze1.elf` | 107,253 条 | ✅ 已定标并接入，真机验证通过 |
 | `rootmygalaxy_v3/` | RMG 参考 ksud/模块产物与机型资料 | — | 参考 |
 
 ## 3. 报告
@@ -43,7 +43,7 @@
 | `ONEUI7_适配可行性报告.md` | One UI 7（BYH7 / 6.1.99）适配可行性 | 已定标（e1q-S9210ZCU4BYH7），待真机 |
 | `dzg1_resukisu_plan.md` | DZG1 线 ReSukiSU/BakaSU 路线规划 | 后续被 DZE2/DZH3 BakaSU 路线接续 |
 | `dzh3_bakasu_late_load.md` | **DZH3 BakaSU late-load 三星适配落地记录** | ✅ 2026-10-17 真机验证（管理器「工作中/LKM/越狱模式」） |
-| `f741n_dze1_analysis.md` | **F741N（韩版 Flip6）DZE1 内核分析**（符号对比 / nfnetlink_log / P0 指纹 / remove_waiter / 编译验证） | ✅ 分析完成并定标接入（App `F741NDZE1`），待真机验证 |
+| `f741n_dze1_analysis.md` | **F741N（韩版 Flip6）DZE1 内核分析**（符号对比 / nfnetlink_log / P0 指纹 / remove_waiter / 编译验证） | ✅ 分析完成、定标接入并真机验证（v3.5.1 正式支持） |
 | `f741n_dze1_draft/` | F741N target 草案与构建产物（`target.h.draft`、`p0_fingerprint.h`、`cve-2026-43499-app.stable.so` 104,128 B） | 备查（正式 target 已建，构建与草案逐字节一致） |
 
 ## 4. 相关文档
