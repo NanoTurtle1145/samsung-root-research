@@ -1,6 +1,6 @@
 # Samsung Root Research
 
-Samsung Galaxy 免解锁 bootloader Root 研究 —— 以 **S24 系列（SM-S9210 / SM-S9260 / SM-S9280 / SM-S926U1 等）** 为主线，另含 Pixel 6（5.10）与 W23（5.10.236）跨平台适配。
+Samsung Galaxy 免解锁 bootloader Root 研究 —— 以 **S24 系列（SM-S9210 / SM-S9260 / SM-S9280 / SM-S928B / SM-S926U1 等）** 为主线，另含 Pixel 6（5.10）与 W23（5.10.236）跨平台适配。
 
 基于内核漏洞 CVE-2026-43499，在不解锁 bootloader、不熔断 KNOX e-fuse 的前提下实现临时提权，并通过 late-load 加载 **KernelSU / BakaSU** 内核驱动。
 
@@ -26,7 +26,7 @@ samsung_root_research/
 ├── 02_exploit工程/           # CVE-2026-43499 利用工程
 │   ├── fusion-s24u/          # 主 exploit（C，NDK 构建）
 │   │   ├── src/              # main.c / pipe.c / slide.c / root.c / su_daemon.c …
-│   │   ├── src/targets/      # 13 个已定标 target（附 README 索引）
+│   │   ├── src/targets/      # 14 个已定标 target（附 README 索引）
 │   │   └── build/            # 各 target 已编译载荷（*-app.stable.so 104,128 B）
 │   ├── dirtyfrag-s9280/      # DirtyFrag 引擎调研
 │   └── pipe_test.c / ksu_test.c / pipe_android61.c
@@ -44,9 +44,9 @@ samsung_root_research/
 │   └── ksud-candidates/      # 各机型 ksud 候选
 │
 ├── devices_ports/            # 逐机型素材 / 定标与分析报告（含 README 索引）
-│   ├── dze2_unpacked/ dze2_xaa_unpacked/ f741n_unpacked/ …
+│   ├── dze2_unpacked/ dze2_xaa_unpacked/ f741n_unpacked/ ezif_unpacked/ …
 │   ├── dzh3_bakasu_late_load.md
-│   └── f741n_dze1_analysis.md
+│   └── f741n_dze1_analysis.md / s928b_ezif_analysis.md
 │
 ├── ADAPTATION_GUIDE.md / ADAPTATION_GUIDE_FULL.md / ADAPTATION_PLAYBOOK.md
 ├── VULNERABILITY_ANALYSIS.md / RUN_LOG_ANALYSIS.md
@@ -73,6 +73,7 @@ samsung_root_research/
 | S9310ZCSCCZG1（国行 S25） | SM-S9310 | 6.6 系列 | ✅ 已定标（App 内置） |
 | W9023ZCSAIZF1（W23 / Fold4） | SM-W9023N | 5.10.236 | ✅ 定标 + 编译通过（2026-10-02），待真机 |
 | `F741NKSS4DZE1`（韩版 Z Flip 6） | SM-F741N | 6.1.145 / 33418572 | ✅ **已实测成功**（beta.191 / issue #16；v3.5.1 起正式支持，App `F741NDZE1`，KSU 3.3.0） |
+| **S928BXXU6EZIF（欧版 One UI 9.0）** | **SM-S928B** | 6.1.162 / 34343818 | ✅ 已定标（载荷 104,128 B 已构建），待真机验证 |
 | Pixel 6（Android 15） | oriole | 5.10.214 | ✅ 已定标 + 载荷交付，待真机验证 |
 
 > 另有 **BakaSU late-load 路线**（不刷 boot、不动 Knox）：在 S9280/DZH3 上通过
@@ -96,6 +97,10 @@ samsung_root_research/
 - **2026-10-18**：RootMyS24 **v3.5.1** 发布 —— 正式支持韩版 Z Flip6；美版 S24+
   （S926U1）DZE2 因尚未真机实测**不纳入**本版（定标与资产保留，待验证后再发）；
   分析报告 `devices_ports/f741n_dze1_analysis.md`。
+- **2026-10-18**：欧版 S24 Ultra（SM-S928B）**One UI 9.0 / EZIF 定标完成**——内核
+  6.1.162（构建号 34343818，代际 6.1.145 → 6.1.162），25 项偏移重标 + P0 指纹全量
+  重生成，载荷 104,128 B 已构建；正式 target `e3q-S928BXXU6EZIF`，**待真机验证**。
+  分析报告 `devices_ports/s928b_ezif_analysis.md`。
 - **2026-10-02**：W23（SM-W9023N / cape / 5.10.236）定标完成并编译通过。
 - **2026-09**：Pixel 6（5.10.214）跨平台适配交付（载荷 + 诊断工具 + App）。
 
@@ -112,6 +117,7 @@ samsung_root_research/
 - **BakaSU 三星适配要点**：KDP task-scoped cred、DEFEX kprobe、RKP 禁 live patch_text
   （回退 setresuid kretprobe + sucompat 地址级 kprobe）、ksud 加载前 staging、UAPI 4 对齐
 - **F741N（韩版 Flip6 DZE1）≈ 美版 S24+**：布局几乎全等，已按美版模板定标并接入 App，beta.191 真机验证通过（v3.5.1 起正式支持）
+- **S928B（欧版 S24U EZIF / One UI 9.0）定标**：6.1.145 → 6.1.162 代际跃升，25 项偏移重标（23 项按符号身份迁移 + 2 项镜像实测：`nfnetlink_log` `0x016ba45d`、random_table boot_id 槽 `0x02396a98`）；`remove_waiter` 154 条指令序列与港版**零差异**；P0 指纹全量重生成（vs 旧版 235/256 qword 不同）
 
 
 ### 文档导航
@@ -123,9 +129,10 @@ samsung_root_research/
 | [RUN_LOG_ANALYSIS.md](./RUN_LOG_ANALYSIS.md) | 成功/失败日志逐行对比与失败特征判读 |
 | [RESEARCH_INDEX.md](./RESEARCH_INDEX.md) | 研究资料全量索引 |
 | [devices_ports/README.md](./devices_ports/README.md) | 机型素材 / 解包内核 / 定标与分析报告索引 |
-| [02_exploit工程/fusion-s24u/src/targets/README.md](./02_exploit工程/fusion-s24u/src/targets/README.md) | 13 个已定标 target 一览（机型/固件/内核/状态） |
+| [02_exploit工程/fusion-s24u/src/targets/README.md](./02_exploit工程/fusion-s24u/src/targets/README.md) | 14 个已定标 target 一览（机型/固件/内核/状态） |
 | [devices_ports/dzh3_bakasu_late_load.md](./devices_ports/dzh3_bakasu_late_load.md) | BakaSU late-load 三星适配落地记录（真机验证） |
 | [devices_ports/f741n_dze1_analysis.md](./devices_ports/f741n_dze1_analysis.md) | F741N（韩版 Flip6）DZE1 内核分析 / 定标报告（已接入并真机验证） |
+| [devices_ports/s928b_ezif_analysis.md](./devices_ports/s928b_ezif_analysis.md) | S928B（欧版 S24 Ultra）EZIF 内核分析 / 定标报告（draft 已构建，待真机验证） |
 | [03_参考研究/SM-S9380_RMG_root_experience.md](./03_参考研究/SM-S9380_RMG_root_experience.md) | SM-S9380 实战经验（boot quiet window / struct page 偏移 / Shell-App 域差异） |
 
 ---

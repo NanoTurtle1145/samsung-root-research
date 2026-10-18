@@ -19,6 +19,7 @@
 | `tgy_oneui8.5_dze2_boot.img` | S24 全系港版 TGY | S9280ZHS6DZE2 | 6.1.145 / 33419968 | **真机验证成功**（2026-08-22） |
 | `xaa_oneui8.5_dze2_boot.img` | **SM-S926U1 美版 S24+ XAA** | S926U1UES6DZE2 | 6.1.145 / 33419968 | **issue #10 修复**；e2q target；App v3.5.0-beta.185 已发布 |
 | `kss_oneui8.5_dze1_boot.img` | **SM-F741N 韩版 Z Flip 6 KSS** | F741NKSS4DZE1 | 6.1.145 / 33418572 | ✅ 已定标并接入（`b6q-F741NKSS4DZE1` / App `F741NDZE1`），beta.191 真机验证通过（issue #16），v3.5.1 正式支持 |
+| `eur_oneui9.0_ezif_boot.img` | **SM-S928B 欧版 S24 Ultra（EUR/OXM；签名 `SM-S928B_EUR_XX_QKEY2`）** | S928BXXU6EZIF | 6.1.162 / 34343818 | **One UI 9.0**；已定标（`e3q-S928BXXU6EZIF`，载荷 104,128 B 已构建），待真机验证 |
 
 > 注：`download.img`（`/home/nt/下载/`）= `boot.2.zip` 内 boot.img = SN-F741N
 > 韩国固件的 boot 分区；Samsung 签名信息 `SM-F741N_KOR_KX_QKEY2`。
@@ -34,6 +35,7 @@
 | `dze2_unpacked/` | **S9280 HK DZE2**：`kernel` + `vmlinux_dze2.elf` | 107,253 条 | ✅ 真机验证 |
 | `dze2_xaa_unpacked/` | **S926U1 US S24+ DZE2**：`kernel` + `vmlinux_dze2_xaa.elf` | 107,253 条 | ✅ 定标（issue #10） |
 | `f741n_unpacked/` | **F741N KR Z Flip6 DZE1**：`kernel` + `vmlinux_f741n_dze1.elf` | 107,253 条 | ✅ 已定标并接入，真机验证通过 |
+| `ezif_unpacked/` | **S928B EU S24U EZIF（One UI 9.0）**：`kernel` + `vmlinux_ezif.elf` | 107,567 条 | 已定标（`e3q-S928BXXU6EZIF`，载荷已构建），待真机验证 |
 | `rootmygalaxy_v3/` | RMG 参考 ksud/模块产物与机型资料 | — | 参考 |
 
 ## 3. 报告
@@ -45,6 +47,8 @@
 | `dzh3_bakasu_late_load.md` | **DZH3 BakaSU late-load 三星适配落地记录** | ✅ 2026-10-17 真机验证（管理器「工作中/LKM/越狱模式」） |
 | `f741n_dze1_analysis.md` | **F741N（韩版 Flip6）DZE1 内核分析**（符号对比 / nfnetlink_log / P0 指纹 / remove_waiter / 编译验证） | ✅ 分析完成、定标接入并真机验证（v3.5.1 正式支持） |
 | `f741n_dze1_draft/` | F741N target 草案与构建产物（`target.h.draft`、`p0_fingerprint.h`、`cve-2026-43499-app.stable.so` 104,128 B） | 备查（正式 target 已建，构建与草案逐字节一致） |
+| `s928b_ezif_analysis.md` | **S928B（欧版 S24 Ultra）EZIF 内核分析**（25 项偏移迁移 / nfnetlink_log / random_table / tracefs / remove_waiter / P0 指纹 / 编译验证） | 定标完成、draft 已构建，待真机验证 |
+| `ezif_draft/` | EZIF target 草案与构建产物（`target.h.draft`、`p0_fingerprint.h`、`cve-2026-43499-app.stable.so` 104,128 B、`cve-2026-43499-app.so`、`cve-2026-43499-root`） | 备查（正式 target 已建，构建与草案逐字节一致） |
 
 ## 4. 相关文档
 

@@ -118,12 +118,26 @@
 | 报告/产物 | `devices_ports/f741n_dze1_analysis.md`、`devices_ports/f741n_dze1_draft/`、`02_exploit工程/fusion-s24u/src/targets/b6q-F741NKSS4DZE1/` |
 | 决策 | 2026-10-18：**已接入 App 并真机验证通过**（beta.191 / issue #16）；v3.5.1 起 `tested=true` 正式发布；服务端 `payloads.json` 已同步翻转 |
 
+### 1f. 欧版 SM-S928B（S24 Ultra）EZIF 定标 — 2026-10-18 draft 已构建，待真机验证
+
+| 项 | 内容 |
+|---|---|
+| 素材 | `/home/nt/下载/S24Ultra Europe One UI 9.0.zip`（boot.img.lz4 + init_boot.img.lz4；`SM-S928B_EUR_XX_QKEY2`，Samsung 签名 2026-09-19；One UI 9.0） |
+| 内核 | `6.1.162-android14-11-34343818-abS928BXXU6EZIF`（构建号 34343818） |
+| ELF | `devices_ports/ezif_unpacked/vmlinux_ezif.elf`（107,567 条符号；43,222,470 B） |
+| vs 港版 S9280 DZE2 | 内核代际跃升（6.1.145→6.1.162）：**25 项偏移宏变化**（23 项符号身份迁移 + 2 项镜像实测） |
+| 关键词 | `nfnetlink_log` `0x016ba45d`；random_table boot_id 槽 `0x02396a98`；tracefs 事件 ID 维持 **106**（索引 86 同港版）；`remove_waiter` 154 条指令序列与港版**零差异** |
+| P0 指纹 | 按 EZIF Image 生成（自校验通过）；vs 港版/美版均 **235/256** qword 不同（代际变化，必须全新指纹） |
+| 编译验证 | 正式 target `src/targets/e3q-S928BXXU6EZIF/` 构建通过；App 载荷 `cve-2026-43499-app.stable.so` **104,128 B**；adb 验证件与 root 守护齐备 |
+| 报告/产物 | `devices_ports/s928b_ezif_analysis.md`、`devices_ports/ezif_draft/`、`02_exploit工程/fusion-s24u/src/targets/e3q-S928BXXU6EZIF/` |
+| 决策 | **待真机验证**（adb 流程）；接入 App / KernelSU 驱动（vermagic 需专属）待定 |
+
 ## 二、Exploit 工程（阶段 3）
 
 | 路径 | 说明 |
 |---|---|
 | `02_exploit工程/fusion-s24u/` | exploit 源码工程（CVE-2026-43499，IonStack 参考实现的 S24 版） |
-| `.../src/targets/` | **13 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
+| `.../src/targets/` | **14 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
 | `.../build/` | 已编译载荷（按 target 分目录；`*-app.stable.so` 104,128 B 为 App 侧载荷） |
 | `02_exploit工程/pipe_test.c` / `ksu_test.c` / `pipe_android61.c` | 设备端诊断工具（F_SETPIPE_SZ 配额 / KernelSU 驱动探测 / 6.1 pipe.c 对照） |
 | `02_exploit工程/dirtyfrag-s9280/` | DirtyFrag 引擎调研（6.1 系 MSG_SPLICE_PAGES 不可达，未采用） |
@@ -213,3 +227,4 @@
 12. **美版 S24+（e2q）已独立定标**：target `e2q-S926USQS6DZE2`；App v3.5.0-beta.185 起内置独立载荷 `cve-2026-43499-dze2-xaa`
 13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；2026-10-18 正式定标并接入 App（条目 `F741NDZE1` + 专属 KSU 3.3.0 驱动 `ksud-f741n-32601`），beta.191 真机验证通过（issue #16），v3.5.1 正式发布
 14. **BakaSU 独立仓库**：<https://github.com/NanoTurtle1145/BakaSU-S9280>（per-boot 脚本 + 三星补丁 + DDK 构建）；App v3.5.0-beta.185 起提供「BakaSU 内核（实验）」开关
+15. **欧版 SM-S928B EZIF（One UI 9.0）定标 draft 完成**（2026-10-18）：内核 6.1.162-android14-11-34343818（6.1.145 → 6.1.162 代际跃升），25 项偏移重标（23 项符号身份迁移 + 2 项镜像实测：`nfnetlink_log` `0x016ba45d`、random_table boot_id 槽 `0x02396a98`）；`remove_waiter` 154 条指令序列与港版零差异；P0 指纹全量重生成（vs 旧版 235/256 不同）；载荷 `cve-2026-43499-app.stable.so` 104,128 B 已构建（`e3q-S928BXXU6EZIF`），待真机验证
