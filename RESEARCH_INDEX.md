@@ -132,12 +132,29 @@
 | 报告/产物 | `devices_ports/s928b_ezif_analysis.md`、`devices_ports/ezif_draft/`、`02_exploit工程/fusion-s24u/src/targets/e3q-S928BXXU6EZIF/` |
 | 决策 | **待真机验证**（adb 流程）；接入 App / KernelSU 驱动（vermagic 需专属）待定 |
 
+### 1g. 欧版 SM-S928B（S24 Ultra）AXK5 / BYD9 / CZA1 三连定标 — 2026-10-24 自动定标完成，待真机验证
+
+| 项 | 内容 |
+|---|---|
+| 素材 | `/home/nt/下载/s24uboot.img`（RAR5，34.8 MB）内 3 个 boot：`boot-S928BXXU4AXK5-Android 14.img`、`boot-S928BXXU4BYD9-Android 15.img`、`boot-S928BXXS4CZA1-Android 16.img`（均 `SM-S928B_EUR_XX_QKEY2` 签名）；已重命名归档为 `devices_ports/eur_oneui{6.1,7.0,8.0}_*.img`（100,663,296 B/个） |
+| 三代内核 | AXK5 `6.1.75 / 29543898`（One UI 6.1 / A14）、BYD9 `6.1.99 / 30958380`（One UI 7.0 / A15）、CZA1 `6.1.128 / 31999054`（One UI 8.0 / A16）；均为 e3q 平台 |
+| 新工具 | **`02_exploit工程/fusion-s24u/tools/calibrate_target.py`**：把 `ADAPTATION_GUIDE` 阶段 1/2 全自动——`llvm-nm` 双 ELF 符号身份迁移 + 6 项镜像实测（`ashmem_misc(s)+0x10`、`random_table+0x108`、`worker_thread+0xA0`、`nfnetlink_log`、tracefs 事件 id）+ **目标内核自带 BTF 结构体核对** + P0 指纹生成 + 审计 TSV/Markdown 报告，异常时非零退出 |
+| 结果 | 三个目标全部 **20 项符号迁移 / 6 项镜像派生 / 112 项沿用（48 项 BTF 实测通过）/ 0 未解析**；载荷 `cve-2026-43499-app.stable.so` 均 **104,128 B** |
+| 关键差异 | ① 欧版 S928B 与港版 S9280 **跨机型**：即使 CZA1 同构建号 31999054，`SLIDE_NFULNL_LOGGER_OFF` 也差 8 B（EUR `0x0160b70d` vs TGY `0x0160b705`）；② tracefs 事件 ID 三代均为 **106**（索引 86）；③ `MM_STRUCT_SZ` 为载荷调优值，BTF 实测六个内核 `sizeof(mm_struct)` 全为 `0x3c0` |
+| BTF 结论 | 6.1 KMI 冻结：6 个内核（6.1.75/99/128/145/162）的 `task_struct`/`rt_mutex_waiter`/`file_operations`/`pool_workqueue`/`worker_pool`/`workqueue_struct`/`slab` 字段偏移**逐项一致**，沿用模板的结构体常量安全 |
+| 编译验证 | 正式 target `src/targets/{e3q-S928BXXU4AXK5,e3q-S928BXXU4BYD9,e3q-S928BXXS4CZA1}/` 构建通过；三件载荷齐备（app.so 127,392 B / stable.so 104,128 B / root 27,496 B，preload 97,176 B） |
+| 报告/产物 | `devices_ports/s928b_{axk5,byd9,cza1_eur}_analysis.md`、`devices_ports/{axk5,byd9,cza1_eur}_draft/`、`02_exploit工程/fusion-s24u/work_S928B_offsets/{axk5,byd9,cza1_eur}/`（报告 + 审计 TSV + nm 表） |
+| 决策 | **待真机验证**；接入 App（`RootViewModel.FirmwareVersion` + 服务端 `payloads.json`）与 KernelSU 专属驱动（vermagic 逐代不同）待定 |
+
+
+
 ## 二、Exploit 工程（阶段 3）
 
 | 路径 | 说明 |
 |---|---|
 | `02_exploit工程/fusion-s24u/` | exploit 源码工程（CVE-2026-43499，IonStack 参考实现的 S24 版） |
-| `.../src/targets/` | **14 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
+| `.../src/targets/` | **17 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
+| `.../tools/calibrate_target.py` | **通用自动定标器**（2026-10-24）：符号身份迁移 + 镜像实测 + BTF 结构体核对 + P0 指纹 + 审计报告，一条命令适配一个新内核 |
 | `.../build/` | 已编译载荷（按 target 分目录；`*-app.stable.so` 104,128 B 为 App 侧载荷） |
 | `02_exploit工程/pipe_test.c` / `ksu_test.c` / `pipe_android61.c` | 设备端诊断工具（F_SETPIPE_SZ 配额 / KernelSU 驱动探测 / 6.1 pipe.c 对照） |
 | `02_exploit工程/dirtyfrag-s9280/` | DirtyFrag 引擎调研（6.1 系 MSG_SPLICE_PAGES 不可达，未采用） |
@@ -151,6 +168,9 @@
   `e3q-S9280ZCS6DZG1`（DZG1，v2.5.6 起并入 DZF2 载荷）、`e3q-S9280ZCS6DZH3`（DZH3，KernelSU 3.3.0 + BakaSU 真机 ✅）
 - `e3q-S928USQS6DZF2`（美版 S24U 参考）、`e1q-S9210ZCU4BYH7`（One UI 7）、
   `S9310ZCSCCZG1`（S25 / 6.6）、`cape-W9023ZCSAIZF1`（W23 / 5.10.236）
+- **欧版 S928B（EUR/OXM）**：`e3q-S928BXXU6EZIF`（One UI 9.0）、
+  `e3q-S928BXXU4AXK5`（One UI 6.1）、`e3q-S928BXXU4BYD9`（One UI 7.0）、`e3q-S928BXXS4CZA1`（One UI 8.0）
+  ——后三者 2026-10-24 由 `tools/calibrate_target.py` 自动定标，载荷均 104,128 B，待真机验证
 
 ## 三、设备端诊断工具（阶段 4 排坑）
 
@@ -228,3 +248,4 @@
 13. **F741N（韩版 Flip6 DZE1）布局≈美版 S24+**：103,520 个 name/type 符号仅 2 个 `.rodata` 标签差 +0x2e；remove_waiter 154 条指令三内核逐字节一致；2026-10-18 正式定标并接入 App（条目 `F741NDZE1` + 专属 KSU 3.3.0 驱动 `ksud-f741n-32601`），beta.191 真机验证通过（issue #16），v3.5.1 正式发布
 14. **BakaSU 独立仓库**：<https://github.com/NanoTurtle1145/BakaSU-S9280>（per-boot 脚本 + 三星补丁 + DDK 构建）；App v3.5.0-beta.185 起提供「BakaSU 内核（实验）」开关
 15. **欧版 SM-S928B EZIF（One UI 9.0）定标 draft 完成**（2026-10-18）：内核 6.1.162-android14-11-34343818（6.1.145 → 6.1.162 代际跃升），25 项偏移重标（23 项符号身份迁移 + 2 项镜像实测：`nfnetlink_log` `0x016ba45d`、random_table boot_id 槽 `0x02396a98`）；`remove_waiter` 154 条指令序列与港版零差异；P0 指纹全量重生成（vs 旧版 235/256 不同）；载荷 `cve-2026-43499-app.stable.so` 104,128 B 已构建（`e3q-S928BXXU6EZIF`），待真机验证
+16. **欧版 SM-S928B 三代固件（AXK5/BYD9/CZA1）自动定标完成**（2026-10-24）：新增通用定标器 `02_exploit工程/fusion-s24u/tools/calibrate_target.py`，一条命令产出 `target.h`/`p0_fingerprint.h`/审计报告；三目标均 0 未解析、载荷 104,128 B。关键结论：**同构建号≠同机型**（CZA1 EUR vs TGY 同 31999054，`SLIDE_NFULNL_LOGGER_OFF` 差 8 B）；**BTF 实测 6.1 KMI 结构体偏移全世代一致**（task_struct/rt_mutex_waiter/file_operations/pool_workqueue/worker_pool/workqueue_struct/slab），故「结构体偏移沿用模板」有据可依；`MM_STRUCT_SZ` 是载荷调优值而非 `sizeof(mm_struct)`（BTF 实测 6 内核均为 0x3c0）

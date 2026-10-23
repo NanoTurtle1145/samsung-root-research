@@ -1,0 +1,5 @@
+# 构建产物（可由 target.h.draft + p0_fingerprint.h + 源码重新构建）
+cve-2026-43499-app.stable.so
+cve-2026-43499-app.so
+cve-2026-43499-root
+cve-2026-43499

@@ -112,6 +112,46 @@ perl generate_p0_fingerprint.pl kernel_dzf2_raw 0x1f0000 p0_fingerprint_dzf2.h
 # 32 行 × 8 qword，设备实测 32/32 命中
 ```
 
+### 2.5 自动化定标（推荐，2026-10-24 起）
+
+阶段 1/2 已完全自动化，一条命令即可适配一个新内核：
+
+```sh
+cd 02_exploit工程/fusion-s24u
+python3 tools/calibrate_target.py \
+  --tag e3q-S928BXXU4AXK5 \
+  --template src/targets/e3q-S9280ZCS4CZA1 \
+  --template-elf ../../devices_ports/cza1_chc_unpacked/vmlinux_cza1_chc.elf \
+  --new-elf    ../../devices_ports/axk5_unpacked/vmlinux_axk5.elf \
+  --new-kernel ../../devices_ports/axk5_unpacked/kernel \
+  --source-img ../../devices_ports/eur_oneui6.1_axk5_boot.img \
+  --model "SM-S928B 欧版 S24 Ultra（EUR）" --oneui "One UI 6.1" --android 14 \
+  --out-dir src/targets/e3q-S928BXXU4AXK5 \
+  --work-dir work_S928B_offsets/axk5 \
+  --cross-check src/targets/e3q-S9280ZHS6DZE2 src/targets/e3q-S928BXXU6EZIF
+```
+
+脚本做的事（等价于 §2.1–2.4，但更严格）：
+
+1. **符号身份迁移**：模板 `target.h` 里每个 `*_OFF` 宏 → 用 `KIMAGE_TEXT_BASE + 值`
+   在模板 ELF 找到符号名 → 在该符号在目标 ELF 的地址上取值（避免跨代际直接复用偏移）；
+   符号改名有候选回退（`ashmem_miscs` ↔ `ashmem_misc`）。
+2. **镜像实测**（模板值不可迁移的 6 项）：`ashmem_misc(s)+0x10`（回读校验 == `ashmem_fops`）、
+   `random_table+0x108`（回读 == `sysctl_bootid`）、`worker_thread+0xA0`、
+   唯一字符串 `nfnetlink_log\0`、tracefs 事件 id = `(__event_sched_blocked_reason -
+   __start_ftrace_events)/8 + 20`。
+3. **BTF 核对**：其余结构体字段偏移沿用模板，但用**目标内核自带 BTF**
+   （`__start_BTF`/`__stop_BTF` 切片）逐项实测 `task_struct` / `rt_mutex_waiter` /
+   `file_operations` / `pool_workqueue` / `worker_pool` / `workqueue_struct` / `slab`
+   / `configfs_buffer` 的字段偏移与结构体大小。
+4. 生成 `target.h` + `p0_fingerprint.h`，并输出 `report_<tag>.md` + `audit_<tag>.tsv`
+   （逐宏 template/new/Δ/证据）；有 UNRESOLVED / BTF 不符 / 回读校验失败时**非零退出**。
+
+> 注意：`MM_STRUCT_SZ` 之类的“调优值”不等于 BTF 的 `sizeof(mm_struct)`
+> （6.1 全世代实测均为 `0x3c0`，而部分真机成功配置写 `0x400`）——脚本会保留模板值并给出提示。
+> 跨 CSC/区域**同构建号也要重跑**：欧版 S928B 与港版 S9280 同为 CZA1 31999054，
+> `SLIDE_NFULNL_LOGGER_OFF` 仍差 8 字节。
+
 ---
 
 ## 阶段 3：构建 payload 并逐阶段验证
