@@ -15,7 +15,7 @@
 
 #define KIMAGE_TEXT_BASE 0xffffffc008000000ULL
 
-/* SM-S928B 欧版 S24 Ultra（EUR） One UI 6.1（构建号 29543898，内核 6.1.75-android...）
+/* SM-S928B 欧版 S24 Ultra（EUR）｜One UI 6.1｜内核 6.1.75-android14-11-29543898-abS928BXXU4AXK5（构建号 29543898）
  *
  * 定标素材: eur_oneui6.1_axk5_boot.img（sha256 fa61e531ea833ec7a6547d8cd26ebaec5769a7cc6003dfde853edfdd6273bad8；
  *   raw Image 35,904,000 B；6.1.75-android14-11-29543898-abS928BXXU4AXK5，构建时间 Nov  8 17:08:42 UTC 2024）
