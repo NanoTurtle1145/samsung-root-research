@@ -78,7 +78,11 @@
 
 - `MM_STRUCT_SZ`：e3q-S9280ZHS6DZE2=0x400(Δ+0x40); e3q-S928BXXU6EZIF=0x400(Δ+0x40); e3q-S9280ZCS6DZF2=0x400(Δ+0x40)
 
-> `MM_STRUCT_SZ` 不是结构体大小而是载荷调优值：BTF 实测六个 6.1 内核（6.1.75/99/128/145/162）`sizeof(mm_struct)` 全为 `0x3c0`；DZE2/EZIF 载荷写 `0x400` 属历史调优差异（两者在 CZA1 真机都成功过），本次沿用模板 `0x3c0`，真机若在 mm 阶段异常再按 §6.3 复核。
+> `MM_STRUCT_SZ` **不是结构体大小**，而是 KernelSnitch bruteforce 的**步长**（`mm_struct_candidate += MM_STRUCT_SZ`）与 slab 对象数的分母（`objs_per_slab = ORDER3_SIZE / MM_STRUCT_SZ`）。BTF 实测六个 6.1 内核（6.1.75/99/128/145/162）`sizeof(mm_struct)` 全为 `0x3c0`，但**直接写 0x3c0 会跨过真实 mm_struct**。
+>
+> **2026-10-25 真机结论**：本条 target 沿用模板 `0x3c0` 时，欧版用户实测 A14（AXK5）与 A15（BYD9）在 physrw 阶段 **100% 失败**——`KernelSnitch mm_struct leak failed`、`prepare_kernel_page did not find usable nonzero source pointers`、后续 `pipe KernelSnitch sk_buff page leak failed`；而 KASLR slide 本身是正常的（`slide-kaslr-ok source=tracefs slide=0xc0000`）。已按**同机型 SM-S928B 已实测的 EZIF** 及其余全部已验证 6.1 target 统一改为 **`0x400`**（`APP_S928_STABLE_RACE` 分支）。
+>
+> **教训**：自动定标器只做符号迁移与 BTF 核对，判断不了这类「调优常量」。从别的模板生成新 target 时，必须把 `#if APP_S928_STABLE_RACE` 块里的 `MM_STRUCT_SZ` / `SLIDE_WAITER_CORE` / `P0_KERNEL_PHYS_LOAD` 与**同机型已实测 target** 逐项对齐。
 
 ## 5. 构建验证
 
@@ -106,7 +110,7 @@ ANDROID_NDK_HOME=/home/nt/项目/samsung_root_research/06_工具链/android-ndk-
 3. 顺手采集：
    - `getprop ro.build.fingerprint`（回填 `target.h` 里的占位指纹）；
    - `cat /sys/kernel/tracing/events/sched/sched_blocked_reason/id`（复核 `SLIDE_TRACEFS_EVENT_ID`）；
-   - 若 mm 阶段异常，记录实际 spray 尺寸以确认 `MM_STRUCT_SZ`（BTF 实测 `sizeof(mm_struct)=0x3c0`，
+   - ~~若 mm 阶段异常，记录实际 spray 尺寸以确认 `MM_STRUCT_SZ`~~ → **已确认为 0x400**（0x3c0 真机 100% 失败，2026-10-25）；
      与模板一致；DZE2/EZIF 载荷用 0x400 是调优差异）。
 
 ## 7. 产物索引
