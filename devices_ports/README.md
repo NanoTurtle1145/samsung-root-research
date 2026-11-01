@@ -1,6 +1,6 @@
 # devices_ports —— 机型号文件 / 内核素材 / 定标与可行性报告
 
-> 整理时间：2026-10-24
+> 整理时间：2026-10-24（2026-11-01 增补 CZD2/CZC1）
 > 说明：本目录存放**逐机型/逐固件**的 boot 镜像、解包内核、恢复的 ELF、定标/分析报告。
 > 通用方法论见根目录 `ADAPTATION_GUIDE.md` / `ADAPTATION_GUIDE_FULL.md`；
 > 目标配置（target.h / p0_fingerprint.h）在
@@ -20,6 +20,8 @@
 | `xaa_oneui8.5_dze2_boot.img` | **SM-S926U1 美版 S24+ XAA** | S926U1UES6DZE2 | 6.1.145 / 33419968 | **issue #10 修复**；e2q target；App v3.5.0-beta.185 已发布 |
 | `kss_oneui8.5_dze1_boot.img` | **SM-F741N 韩版 Z Flip 6 KSS** | F741NKSS4DZE1 | 6.1.145 / 33418572 | ✅ 已定标并接入（`b6q-F741NKSS4DZE1` / App `F741NDZE1`），beta.191 真机验证通过（issue #16），v3.5.1 正式支持 |
 | `eur_oneui9.0_ezif_boot.img` | **SM-S928B 欧版 S24 Ultra（EUR/OXM；签名 `SM-S928B_EUR_XX_QKEY2`）** | S928BXXU6EZIF | 6.1.162 / 34343818 | **One UI 9.0**；已定标（`e3q-S928BXXU6EZIF`，载荷 104,128 B 已构建），待真机验证 |
+| `tgy_oneui8.0_czd2_boot.img` | **SM-S9210 港版 Galaxy S24（TGY）** | S9210ZHS5CZD2 | 6.1.128 / 31999054 | One UI 8.0；issue #20；已定标（`e1q-S9210ZHS5CZD2`），载荷已构建，待真机验证 |
+| `tgy_oneui8.0_czc1_boot.img` | **SM-S9260 港版 Galaxy S24+（TGY）** | S9260ZHS5CZC1 | 6.1.128 / 31999054 | One UI 8.0；**issue #6**（此前无载荷）；已定标（`e2q-S9260ZHS5CZC1`），载荷已构建，待真机验证 |
 | `eur_oneui6.1_axk5_boot.img` | **SM-S928B 欧版 S24 Ultra（EUR；签名 `SM-S928B_EUR_XX_QKEY2`）** | S928BXXU4AXK5 | 6.1.75 / 29543898 | 2026-10-24 归档；**One UI 6.1（Android 14）**；✅ 已自动定标（`e3q-S928BXXU4AXK5`，载荷 104,128 B 已构建），待真机验证 |
 | `eur_oneui7.0_byd9_boot.img` | SM-S928B 欧版 S24 Ultra（EUR） | S928BXXU4BYD9 | 6.1.99 / 30958380 | 2026-10-24 归档；**One UI 7.0（Android 15）**；✅ 已自动定标（`e3q-S928BXXU4BYD9`，载荷 104,128 B 已构建），待真机验证 |
 | `eur_oneui8.0_cza1_boot.img` | SM-S928B 欧版 S24 Ultra（EUR） | S928BXXS4CZA1 | 6.1.128 / 31999054 | 2026-10-24 归档；**One UI 8.0（Android 16）**；✅ 已自动定标（`e3q-S928BXXS4CZA1`）；注意与港版 TGY 同构建号但**非同一机型**，`SLIDE_NFULNL_LOGGER_OFF` 差 8 字节；待真机验证 |
@@ -46,6 +48,8 @@
 | `axk5_unpacked/` | **S928B EU S24U AXK5（One UI 6.1）**：`kernel` + `vmlinux_axk5.elf` + `vmlinux_axk5.btf` | 97,796 条 | 已自动定标（`e3q-S928BXXU4AXK5`），待真机验证 |
 | `byd9_unpacked/` | **S928B EU S24U BYD9（One UI 7.0）**：`kernel` + `vmlinux_byd9.elf` + `vmlinux_byd9.btf` | 100,386 条 | 已自动定标（`e3q-S928BXXU4BYD9`），待真机验证 |
 | `cza1_eur_unpacked/` | **S928B EU S24U CZA1（One UI 8.0）**：`kernel` + `vmlinux_cza1_eur.elf` + `vmlinux_cza1_eur.btf` | 100,747 条 | 已自动定标（`e3q-S928BXXS4CZA1`），待真机验证 |
+| `czd2_unpacked/` | **S9210 HK CZD2（One UI 8.0）**：`kernel` + `vmlinux_czd2.elf` + `vmlinux_czd2.btf` | 100,754 条 | 已定标（`e1q-S9210ZHS5CZD2`），待真机验证 |
+| `czc1_unpacked/` | **S9260 HK CZC1（One UI 8.0）**：`kernel` + `vmlinux_czc1.elf` + `vmlinux_czc1.btf` | 100,754 条 | ✅ 已定标（`e2q-S9260ZHS5CZC1`，与 CZD2 内核符号 100% 同址），载荷已构建，待真机验证 |
 | `rootmygalaxy_v3/` | RMG 参考 ksud/模块产物与机型资料 | — | 参考 |
 
 ## 3. 报告
@@ -57,6 +61,8 @@
 | `dzh3_bakasu_late_load.md` | **DZH3 BakaSU late-load 三星适配落地记录** | ✅ 2026-10-17 真机验证（管理器「工作中/LKM/越狱模式」） |
 | `f741n_dze1_analysis.md` | **F741N（韩版 Flip6）DZE1 内核分析**（符号对比 / nfnetlink_log / P0 指纹 / remove_waiter / 编译验证） | ✅ 分析完成、定标接入并真机验证（v3.5.1 正式支持） |
 | `f741n_dze1_draft/` | F741N target 草案与构建产物（`target.h.draft`、`p0_fingerprint.h`、`cve-2026-43499-app.stable.so` 104,128 B） | 备查（正式 target 已建，构建与草案逐字节一致） |
+| `s9210_czd2_analysis.md` | **S9210 港版 CZD2 内核分析**（19 项符号迁移 + 1 处人工修正 SELINUX / 6 项镜像实测 / BTF 47 项 / 构建验证） | 已定标（`e1q-S9210ZHS5CZD2`），待真机验证（issue #20） |
+| `s9260_czc1_analysis.md` | **S9260 港版 CZC1 内核分析**（与 CZD2 符号 100% 同址 / nfnetlink_log +0x52 / remove_waiter 逐字节相同 / 3 处人工核对 / 构建验证） | ✅ 定标完成（`e2q-S9260ZHS5CZC1`，载荷 104,128 B 已构建），待真机验证（issue #6） |
 | `s928b_ezif_analysis.md` | **S928B（欧版 S24 Ultra）EZIF 内核分析**（25 项偏移迁移 / nfnetlink_log / random_table / tracefs / remove_waiter / P0 指纹 / 编译验证） | 定标完成、draft 已构建，待真机验证 |
 | `ezif_draft/` | EZIF target 草案与构建产物（`target.h.draft`、`p0_fingerprint.h`、`cve-2026-43499-app.stable.so` 104,128 B、`cve-2026-43499-app.so`、`cve-2026-43499-root`） | 备查（正式 target 已建，构建与草案逐字节一致） |
 | `s928b_axk5_analysis.md` | **S928B 欧版 AXK5 内核分析**（20 项符号迁移 / 6 项镜像实测 / 48 项 BTF 核对 / 构建验证 / 真机清单） | 自动定标完成（`e3q-S928BXXU4AXK5`），待真机验证 |

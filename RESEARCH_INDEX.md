@@ -148,12 +148,29 @@
 
 
 
+### 1h. 港版 SM-S9260（S24+）CZC1 定标（issue #6）— 2026-11-01 自动定标完成，待真机验证
+
+| 项 | 内容 |
+|---|---|
+| 素材 | `/home/nt/下载/boot.img (1).lz4`（21,569,067 B，sha256 `1abb434d…`）→ 解压归档 `devices_ports/tgy_oneui8.0_czc1_boot.img`（100,663,296 B，sha256 `22454bc2…`）；boot header v4 / `KERNEL_SZ=37,022,208` / `RAMDISK_SZ=0` / `OS_PATCH_LEVEL=2026-03` / `SAMSUNG_SEANDROID`+`VBMETA` |
+| 机型 / 系统 | **SM-S9260 港版 Galaxy S24+（e2q / SM8550）**；One UI 8.0 / Android 16，安全补丁 2026-03-05 |
+| 内核 | `6.1.128-android14-11-31999054-abS9260ZHS5CZC1`（构建号 31999054，构建时间 2026-03-12 04:30:18 UTC） |
+| ELF / BTF | `devices_ports/czc1_unpacked/vmlinux_czc1.elf`（100,754 条符号，41,946,294 B）、`vmlinux_czc1.btf`（5,859,386 B） |
+| 模板选择依据 | 与 **CZD2**（`S9210ZHS5CZD2`，6.1.128/31999054，2026-04-08 构建）：**100,754 个符号地址 100% 相同**、BTF 大小一致、`remove_waiter` 反汇编逐字节相同 → 同镜像结构；相比之下 CZA1（同为 31999054）**不同址**（text ~+0x800、data ~+0x10000）→ issue #6 的 180/180 失败根因 |
+| 定标结果 | 迁移 20 / 派生 6 / 沿用 114（BTF 实测 47）/ **未解析 0**；符号项全部 Δ=0；唯一镜像派生差异 `SLIDE_NFULNL_LOGGER_OFF` **0x0161b835**（模板 0x0161b7e3，+0x52）；tracefs 事件 ID 106 |
+| 人工核对 | ① `BUILD_FINGERPRINT` 换成 issue #6 真机指纹 `samsung/e2qzhx/e2q:16/BP2A.250605.031.A3/…`；② `P0_FINGERPRINT_HEADER` 修模板残留路径；③ `SELINUX_ENFORCING_OFF` 注释改为"由符号迁移继承 CZD2 已修正值" |
+| 漏洞路径 | `remove_waiter`（0x268 B）与 CZD2 逐字节相同，含 `str xzr,[x20,#0x950]`（x20=SP_EL0=current）→ 上游补丁所修错误分支仍在，`pi_lock=0x924`/`pi_blocked_on=0x950` 与 target 常量一致 |
+| P0 指纹 | 按本机 Image 重生成（32×8=256 qword，末行首词=MZ 头自校验通过）；vs CZD2 仅 **2 个 qword** 不同 |
+| 编译验证 | 正式 target `src/targets/e2q-S9260ZHS5CZC1/` 构建通过；载荷 `cve-2026-43499-app.stable.so` **104,128 B**（sha256 `e14d2b89…`，PI 窗口取 **125ms** 保守值，模板为 300ms），内嵌标签/32 行指纹全部校验通过，重编译逐字节可复现；vs CZD2 载荷仅 4.52% 字节不同 |
+| 报告/产物 | `devices_ports/s9260_czc1_analysis.md`、`devices_ports/czc1_unpacked/`、`02_exploit工程/fusion-s24u/work_S9260_offsets/czc1/`（报告+审计 TSV+nm 表） |
+| 决策 | **待真机验证**：按 2026-11-01 决定走 **gamma 一对一渠道**（RootMyS9280 只打包该载荷，`tested=false`）；`SLIDE_WAIT_NSEC` 取 **125ms**（EZIF 实测 300ms 会 panic、125ms 成功；窗口过短只 triggered=0，风险不对称）；通过后转正式条目并回馈 Root-My-Galaxy-Payloads |
+
 ## 二、Exploit 工程（阶段 3）
 
 | 路径 | 说明 |
 |---|---|
 | `02_exploit工程/fusion-s24u/` | exploit 源码工程（CVE-2026-43499，IonStack 参考实现的 S24 版） |
-| `.../src/targets/` | **17 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
+| `.../src/targets/` | **20 个已定标 target**（`target.h` + `p0_fingerprint.h`），索引见 `src/targets/README.md` |
 | `.../tools/calibrate_target.py` | **通用自动定标器**（2026-10-24）：符号身份迁移 + 镜像实测 + BTF 结构体核对 + P0 指纹 + 审计报告，一条命令适配一个新内核 |
 | `.../build/` | 已编译载荷（按 target 分目录；`*-app.stable.so` 104,128 B 为 App 侧载荷） |
 | `02_exploit工程/pipe_test.c` / `ksu_test.c` / `pipe_android61.c` | 设备端诊断工具（F_SETPIPE_SZ 配额 / KernelSU 驱动探测 / 6.1 pipe.c 对照） |
@@ -249,3 +266,4 @@
 14. **BakaSU 独立仓库**：<https://github.com/NanoTurtle1145/BakaSU-S9280>（per-boot 脚本 + 三星补丁 + DDK 构建）；App v3.5.0-beta.185 起提供「BakaSU 内核（实验）」开关
 15. **欧版 SM-S928B EZIF（One UI 9.0）定标 draft 完成**（2026-10-18）：内核 6.1.162-android14-11-34343818（6.1.145 → 6.1.162 代际跃升），25 项偏移重标（23 项符号身份迁移 + 2 项镜像实测：`nfnetlink_log` `0x016ba45d`、random_table boot_id 槽 `0x02396a98`）；`remove_waiter` 154 条指令序列与港版零差异；P0 指纹全量重生成（vs 旧版 235/256 不同）；载荷 `cve-2026-43499-app.stable.so` 104,128 B 已构建（`e3q-S928BXXU6EZIF`），待真机验证
 16. **欧版 SM-S928B 三代固件（AXK5/BYD9/CZA1）自动定标完成**（2026-10-24）：新增通用定标器 `02_exploit工程/fusion-s24u/tools/calibrate_target.py`，一条命令产出 `target.h`/`p0_fingerprint.h`/审计报告；三目标均 0 未解析、载荷 104,128 B。关键结论：**同构建号≠同机型**（CZA1 EUR vs TGY 同 31999054，`SLIDE_NFULNL_LOGGER_OFF` 差 8 B）；**BTF 实测 6.1 KMI 结构体偏移全世代一致**（task_struct/rt_mutex_waiter/file_operations/pool_workqueue/worker_pool/workqueue_struct/slab），故「结构体偏移沿用模板」有据可依；`MM_STRUCT_SZ` 是载荷调优值而非 `sizeof(mm_struct)`（BTF 实测 6 内核均为 0x3c0）
+17. **港版 S9260 CZC1（issue #6）定标完成**（2026-11-01）：`S9260ZHS5CZC1`（6.1.128/31999054）与 CZD2 `S9210ZHS5CZD2` 内核 **100,754 符号 100% 同址**、`remove_waiter` 逐字节相同，唯一镜像差 `.rodata`（`SLIDE_NFULNL_LOGGER_OFF` +0x52）；与同为 31999054 的 CZA1 却不同址——**「同构建号」只是必要条件，判定必须比符号表**。target `e2q-S9260ZHS5CZC1`，载荷 104,128 B 已构建，待真机验证
