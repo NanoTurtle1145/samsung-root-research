@@ -267,3 +267,11 @@
 15. **欧版 SM-S928B EZIF（One UI 9.0）定标 draft 完成**（2026-10-18）：内核 6.1.162-android14-11-34343818（6.1.145 → 6.1.162 代际跃升），25 项偏移重标（23 项符号身份迁移 + 2 项镜像实测：`nfnetlink_log` `0x016ba45d`、random_table boot_id 槽 `0x02396a98`）；`remove_waiter` 154 条指令序列与港版零差异；P0 指纹全量重生成（vs 旧版 235/256 不同）；载荷 `cve-2026-43499-app.stable.so` 104,128 B 已构建（`e3q-S928BXXU6EZIF`），待真机验证
 16. **欧版 SM-S928B 三代固件（AXK5/BYD9/CZA1）自动定标完成**（2026-10-24）：新增通用定标器 `02_exploit工程/fusion-s24u/tools/calibrate_target.py`，一条命令产出 `target.h`/`p0_fingerprint.h`/审计报告；三目标均 0 未解析、载荷 104,128 B。关键结论：**同构建号≠同机型**（CZA1 EUR vs TGY 同 31999054，`SLIDE_NFULNL_LOGGER_OFF` 差 8 B）；**BTF 实测 6.1 KMI 结构体偏移全世代一致**（task_struct/rt_mutex_waiter/file_operations/pool_workqueue/worker_pool/workqueue_struct/slab），故「结构体偏移沿用模板」有据可依；`MM_STRUCT_SZ` 是载荷调优值而非 `sizeof(mm_struct)`（BTF 实测 6 内核均为 0x3c0）
 17. **港版 S9260 CZC1（issue #6）定标完成**（2026-11-01）：`S9260ZHS5CZC1`（6.1.128/31999054）与 CZD2 `S9210ZHS5CZD2` 内核 **100,754 符号 100% 同址**、`remove_waiter` 逐字节相同，唯一镜像差 `.rodata`（`SLIDE_NFULNL_LOGGER_OFF` +0x52）；与同为 31999054 的 CZA1 却不同址——**「同构建号」只是必要条件，判定必须比符号表**。target `e2q-S9260ZHS5CZC1`，载荷 104,128 B 已构建，待真机验证
+
+## 2026-11-07 · SM-S9280(S9280ZHU6EZIF) 实机 root 成功
+
+- 方法：**SamTimer v1.3（CVE-2026-98260）UMH 链路 + KSU 32601 多 KMI KDP late-load**
+- 结果：`su -c id` → `uid=0 / u:r:ksu:s0`，`kernelsu` 模块 Live，重启失效（临时 root）
+- 归档：`07_发布物/samtimer-98260-root/`（README + payloads + SHA256SUMS）
+- 自研链路结项：`cve-2026-98260-uaf/FINAL_REPORT.md`（触发/泄漏通，cred 收尾未打通）
+- RootMyS24 集成：commit `80c5742`（引擎）/ `560892b`（引擎切换选项卡）
