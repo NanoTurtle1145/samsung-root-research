@@ -130,3 +130,37 @@ $ getenforce                          # Enforcing
 - 多 KMI KDP ksud：<https://github.com/shangu2003/SamsungRootKit>（v1.0.0）
 - KDP 适配补丁分支：`polygraphene/KernelSU` → `kdp-612-3.3.0`
 - 自研结项：`cve-2026-98260-uaf/FINAL_REPORT.md`、`HANDOFF.md`
+
+## 0x09 归档变体：保留「自动打开管理器 + 软重启」的原版 late-load
+
+- 源码分支：`root-my-s24` 仓库 `archive/samtimer-stock-lateload`（commit `a1e37ba`）
+- APK：`variants/RootMyS24-v3.5.6-beta.252-samtimer-stock-lateload.apk`（14,934,877 B）
+  - 行为：late-load 用 **stock 多 KMI KDP ksud 32601**（不传 `--ephemeral`）
+  - 结果：能 root，但 ksud 的 `Restarting KernelSU Manager` 会 `am start` 管理器，
+    且 late-load 会跑 module stage 脚本 → zygsik 类模块重拉 zygote → **软重启（framework 重启，无害）**
+  - 保留原因：这是"完整 late-load 行为"的对照样本；默认版本已切成 3.2.5 + ephemeral（无管理器启动/无软重启）
+- 默认版本：EZIF 走 `ksud-32525`（3.2.5），3.3.0 在 EZIF 上不可用（见 0x05/0x0A）
+
+## 0x0A 为什么 43499(GhostLock) 不会像 98260 这样崩
+
+两个 CVE 的 UAF 对象"能不能安全离开"完全不同：
+
+**CVE-2026-43499（rtmutex/futex waiter）**
+- 触发点：`remove_waiter()` 清的是 `current->pi_blocked_on` 而不是 `waiter->task->pi_blocked_on`
+- 利用：拿 stale waiter → pipe 物理读写原语 → 改 `misc_fops`（CFI）→ UMH 起 root
+- 收尾：成功后用 `stability keeper` 进程**主动 retain 回收页**；内核侧没有"指向已释放对象、
+  且之后必经的链表节点"。失败尝试的 stale 对象能被它的 reap 逻辑消化掉，
+  所以 43499 一个开机内连跑 30 次 attempt 也不炸（线上数据也是这么来的）
+
+**CVE-2026-98260（posix-cpu-timers）**
+- UAF 对象是 **活着的 victim task 的 `posix_cputimers` 里那个 `timerqueue_node`**
+- 唯一清理路径是 `release_task → exit_itimers → cleanup_timerqueue → timerqueue_del`：
+  对已释放的 `k_itimer` 再做一次摘链 = 内核 panic
+- 所以 fork 的选择是 **parking without reap**：让 victim 永远 zombie、不 reap，内核就永远走不到
+  那条清理路径。代价是：
+  1. 失败一次就留下一个"永久 zombie + stale 节点"，这个开机会话里没法清掉（只有重启能清）
+  2. **parked 进程不能被 kill**（它拿着伪造页/僵尸链）——一旦被回收，内核状态立刻坏 → 稍后卡死/重启
+  3. 同一开机内再跑一次，等于叠加新的 stale 节点，撞上的概率越来越高
+- 这解释了实测现象：98260 第一次常 park、杀后台重开第二次成功；之后同开机再跑就容易崩
+
+一句话：**43499 的 UAF 可以"用完就走"，98260 的 UAF 必须"供着不能碰"**。
