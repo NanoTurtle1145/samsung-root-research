@@ -1,0 +1,673 @@
+id=19325 received=2026-11-03 22:08:47 app=v3.5.1-beta.203 (build 203) payload=e3q-S928BXXU6EZIF-app-physical-p0-oracle tried=1 ok=0
+============================================================
+RootMyS24 v3.5.1-beta.203 (build 203)
+RUN-ID: cb7729f4-1793708414467
+载荷: cve-2026-43499-S928BXXU6EZIF · KSU: BakaSU 35171 (三星适配) (ksud-bakasu-dzh3)
+◆ RootMyS24 启动中
+◆ 载荷: cve-2026-43499-S928BXXU6EZIF (BYH7修复版, pipe gate v2)
+[1/5] 检查 Shizuku...
+✔ Shizuku 就绪
+◆ 设备: SM-S9280 (pineapple)
+◆ 系统: Android 17 / 安全补丁 2026-10-05
+◆ 固件: S9280ZHS6EZJ1 (bootloader S9280ZHS6EZJ1)
+◆ 指纹: samsung/e3qzhx/e3q:17/CP2A.260605.016/S9280ZHS6EZJ1:user/release-keys
+◆ KNOX: 完好 (warranty_bit=0, verifiedbootstate=green)
+◆ 版本: RootMyS24 v3.5.1-beta.203 (build 203)
+◆ BakaSU 模式：模块仅对 DZH3（6.1.145）实测通过；其他构建内核差异可能导致加载失败或重启
+[2/5] 推送载荷到 /data/local/tmp ...
+✔ 推送完成 (cve-2026-43499-S928BXXU6EZIF=104128B, cve-2026-43499-root-bakasu=27568B)
+◆ 诊断: pipe-max-size=? pipe-user-pages=cat: /proc/sys/fs/pipe-user-pages-soft: Permission denied
+cat: /proc/sys/fs/pipe-user-pages-hard: Permission denied
+n/a
+◆ 诊断: /proc/version=Linux version 6.1.162-android14-11-34343818-abS9280ZHS6EZJ1 (build-user@build-host) (Android (10087095, +pgo, +bolt, +lto, -mlgo, based on r487747c) clang version 17.0.2 (https://android.googlesource.
+◆ 环境: load=[13.45 4.56 1.61 2/8171 19333] D态任务=[2] MemAvailable:    5693904 kB SwapTotal:      12582908 kB SwapFree:       10998012 kB
+⚠ 当前内核负载偏高（load1=13.45, 核数=8, D态任务=2）：竞态成功率会明显下降。建议重启后再跑，或稍等片刻重试。
+[2.6/5] 清理残留 exploit 进程与临时文件 ...
+✔ 环境清理完成 (exit=137)
+◆ 内核 6.1.162-android14-11-34343818-abS9280ZHS6EZJ1
+◆ KMI android14-6.1 · DirtyFrag 不可达 ✗ · 引擎 GHOSTLOCK
+[3/5] 触发 CVE-2026-43499 (LD_PRELOAD /system/bin/true) ...
+◆ 已自动熄屏（运行完成后将唤醒；可手动按电源键随时查看）
+ℹ 本次运行会熄屏，Shizuku 可能因此在跑完后被系统回收；若不想受影响，可在首页授权卡改用「无线调试直连」。
+[+] preload supervisor pid=19377 attempts=30 base_delay=20000 p0_timeout=45 timeout=120
+[+] exploit attempt=1/30 pid=19380 delay=50000 p0_offset=scan
+[+] startup context pid=19380 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=19380 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=19380 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=19380 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[+] slide tracefs pre-oracle base=ffffffc008040000 slide=00040000
+[+] slide-kaslr-ok source=tracefs pid=19380 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff80422b8000
+[*] mm leaked=ffffff8a6c9e3400 base=ffffff8a6c9e0000 object_index=13
+[*] S928 bank bucket=13 lock=0x42a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6984 base=ffffff8a6c9e0000
+[*] app fops slide route parent=ffffff8a6c9e1180 target=ffffff802a41c200 lock=ffffff8a6c9e3420 delay=70000
+[+] slide child context route=pselect pid=28417 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=19380 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=19380 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[+] supervisor retained p0_offset=0x40000 gate=0x0 probe=0x0
+[-] exploit attempt=1/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=2/30 pid=28514 delay=50000 p0_offset=0x40000
+[+] startup context pid=28514 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=28514 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=28514 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=28514 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=28514 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff881a348000
+[*] mm leaked=ffffff8a60aad400 base=ffffff8a60aa8000 object_index=21
+[*] S928 bank bucket=21 lock=0x62a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=5108 base=ffffff8a60aa8000
+[*] app fops slide route parent=ffffff8a60aa9180 target=ffffff802a41c200 lock=ffffff8a60aad420 delay=70000
+[+] slide child context route=pselect pid=9632 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=28514 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=28514 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=2/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=3/30 pid=10011 delay=50000 p0_offset=0x40000
+[+] startup context pid=10011 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=10011 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=10011 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=10011 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=10011 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff88fdf58000
+[*] mm leaked=ffffff8921d62000 base=ffffff8921d60000 object_index=8
+[*] S928 bank bucket=8 lock=0x2ea0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=5509 base=ffffff8921d60000
+[*] app fops slide route parent=ffffff8921d61180 target=ffffff802a41c200 lock=ffffff8921d62020 delay=70000
+[+] slide child context route=pselect pid=20632 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=10011 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=10011 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=3/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=4/30 pid=20639 delay=50000 p0_offset=0x40000
+[+] startup context pid=20639 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=20639 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=20639 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=20639 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=20639 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff802e168000
+[*] mm leaked=ffffff8a58e92400 base=ffffff8a58e90000 object_index=9
+[*] S928 bank bucket=9 lock=0x32a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=5053 base=ffffff8a58e90000
+[*] app fops slide route parent=ffffff8a58e91180 target=ffffff802a41c200 lock=ffffff8a58e92420 delay=70000
+[+] slide child context route=pselect pid=29622 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=20639 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=20639 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=4/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=5/30 pid=29630 delay=50000 p0_offset=0x40000
+[+] startup context pid=29630 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=29630 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=29630 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=29630 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=29630 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8045b30000
+[*] mm leaked=ffffff8825f29400 base=ffffff8825f28000 object_index=5
+[*] S928 bank bucket=5 lock=0x22a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=4873 base=ffffff8825f28000
+[*] app fops slide route parent=ffffff8825f29180 target=ffffff802a41c200 lock=ffffff8825f29420 delay=70000
+[+] slide child context route=pselect pid=11216 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=29630 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=29630 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=5/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=6/30 pid=11231 delay=50000 p0_offset=0x40000
+[+] startup context pid=11231 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=11231 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=11231 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=11231 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=11231 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8930998000
+[*] mm leaked=ffffff8a625e0400 base=ffffff8a625e0000 object_index=1
+[*] S928 bank bucket=1 lock=0x12a0 task=0x6000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=8353 base=ffffff8a625e0000
+[*] app fops slide route parent=ffffff8a625e1180 target=ffffff802a41c200 lock=ffffff8a625e0420 delay=70000
+[+] slide child context route=pselect pid=21513 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=11231 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=11231 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=6/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=7/30 pid=21520 delay=50000 p0_offset=0x40000
+[+] startup context pid=21520 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=21520 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=21520 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=21520 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=21520 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff80449a0000
+[*] mm leaked=ffffff803908fc00 base=ffffff8039088000 object_index=31
+[-] S928 lock bucket rejected=31 max=27 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=4485 base=0000000000000000
+[-] prepare_kernel_page retry 1/2
+[*] mm leaked=ffffff8a67069400 base=ffffff8a67068000 object_index=5
+[*] S928 bank bucket=5 lock=0x22a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=2/2 elapsed_ms=5188 base=ffffff8a67068000
+[*] app fops slide route parent=ffffff8a67069180 target=ffffff802a41c200 lock=ffffff8a67069420 delay=70000
+[+] slide child context route=pselect pid=6823 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=21520 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=21520 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=7/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=8/30 pid=6853 delay=50000 p0_offset=0x40000
+[+] startup context pid=6853 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=6853 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=6853 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=6853 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=6853 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff89184e0000
+[*] mm leaked=ffffff89cbe33800 base=ffffff89cbe30000 object_index=14
+[*] S928 bank bucket=14 lock=0x46a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=9385 base=ffffff89cbe30000
+[*] app fops slide route parent=ffffff89cbe31180 target=ffffff802a41c200 lock=ffffff89cbe33820 delay=70000
+[+] slide child context route=pselect pid=18716 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=6853 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=6853 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=8/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=9/30 pid=18724 delay=50000 p0_offset=0x40000
+[+] startup context pid=18724 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=18724 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=18724 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=18724 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=18724 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8930678000
+[*] mm leaked=ffffff893f1b0000 base=ffffff893f1b0000 object_index=0
+[*] S928 bank bucket=0 lock=0xea0 task=0x6000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6621 base=ffffff893f1b0000
+[*] app fops slide route parent=ffffff893f1b1180 target=ffffff802a41c200 lock=ffffff893f1b0020 delay=70000
+[+] slide child context route=pselect pid=27692 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=18724 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=18724 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=9/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=10/30 pid=27696 delay=50000 p0_offset=0x40000
+[+] startup context pid=27696 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=27696 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=27696 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=27696 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=27696 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8996f18000
+[*] mm leaked=ffffff80018ab800 base=ffffff80018a8000 object_index=14
+[*] S928 bank bucket=14 lock=0x46a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=4297 base=ffffff80018a8000
+[*] app fops slide route parent=ffffff80018a9180 target=ffffff802a41c200 lock=ffffff80018ab820 delay=70000
+[+] slide child context route=pselect pid=8261 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=27696 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=27696 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=10/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=11/30 pid=8266 delay=50000 p0_offset=0x40000
+[+] startup context pid=8266 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=8266 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=8266 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=8266 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=8266 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8827f38000
+[*] mm leaked=ffffff89cde3a800 base=ffffff89cde38000 object_index=10
+[*] S928 bank bucket=10 lock=0x36a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6013 base=ffffff89cde38000
+[*] app fops slide route parent=ffffff89cde39180 target=ffffff802a41c200 lock=ffffff89cde3a820 delay=70000
+[+] slide child context route=pselect pid=19626 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=8266 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=8266 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=11/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=12/30 pid=19632 delay=50000 p0_offset=0x40000
+[+] startup context pid=19632 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=19632 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=19632 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=19632 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=19632 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff882cc58000
+[*] mm leaked=ffffff89e0f2c000 base=ffffff89e0f28000 object_index=16
+[*] S928 bank bucket=16 lock=0x4ea0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=7348 base=ffffff89e0f28000
+[*] app fops slide route parent=ffffff89e0f29180 target=ffffff802a41c200 lock=ffffff89e0f2c020 delay=70000
+[+] slide child context route=pselect pid=28580 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=19632 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=19632 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=12/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=13/30 pid=28587 delay=50000 p0_offset=0x40000
+[+] startup context pid=28587 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=28587 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=28587 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=28587 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=28587 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff88f6910000
+[*] mm leaked=ffffff802e0fbc00 base=ffffff802e0f8000 object_index=15
+[*] S928 bank bucket=15 lock=0x4aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=5750 base=ffffff802e0f8000
+[*] app fops slide route parent=ffffff802e0f9180 target=ffffff802a41c200 lock=ffffff802e0fbc20 delay=70000
+[+] slide child context route=pselect pid=9515 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=28587 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=28587 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=13/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=14/30 pid=9532 delay=50000 p0_offset=0x40000
+[+] startup context pid=9532 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=9532 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=9532 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=9532 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=9532 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8a240f0000
+[*] mm leaked=ffffff803850e800 base=ffffff8038508000 object_index=26
+[*] S928 bank bucket=26 lock=0x76a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6617 base=ffffff8038508000
+[*] app fops slide route parent=ffffff8038509180 target=ffffff802a41c200 lock=ffffff803850e820 delay=70000
+[+] slide child context route=pselect pid=20283 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=9532 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=9532 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=14/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=15/30 pid=20287 delay=50000 p0_offset=0x40000
+[+] startup context pid=20287 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=20287 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=20287 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=20287 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=20287 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8036968000
+[*] mm leaked=ffffff892b916000 base=ffffff892b910000 object_index=24
+[*] S928 bank bucket=24 lock=0x6ea0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=5780 base=ffffff892b910000
+[*] app fops slide route parent=ffffff892b911180 target=ffffff802a41c200 lock=ffffff892b916020 delay=70000
+[+] slide child context route=pselect pid=29258 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=20287 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=20287 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=15/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=16/30 pid=29262 delay=50000 p0_offset=0x40000
+[+] startup context pid=29262 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=29262 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=29262 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=29262 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=29262 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff893eed8000
+[*] mm leaked=ffffff892f5f0000 base=ffffff892f5f0000 object_index=0
+[*] S928 bank bucket=0 lock=0xea0 task=0x6000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6257 base=ffffff892f5f0000
+[*] app fops slide route parent=ffffff892f5f1180 target=ffffff802a41c200 lock=ffffff892f5f0020 delay=70000
+[+] slide child context route=pselect pid=10278 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=29262 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=29262 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=16/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=17/30 pid=10349 delay=50000 p0_offset=0x40000
+[+] startup context pid=10349 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=10349 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=10349 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=10349 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=10349 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8a62740000
+[*] mm leaked=ffffff8a090de000 base=ffffff8a090d8000 object_index=24
+[*] S928 bank bucket=24 lock=0x6ea0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6029 base=ffffff8a090d8000
+[*] app fops slide route parent=ffffff8a090d9180 target=ffffff802a41c200 lock=ffffff8a090de020 delay=70000
+[+] slide child context route=pselect pid=20625 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=10349 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=10349 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=17/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=18/30 pid=20664 delay=50000 p0_offset=0x40000
+[+] startup context pid=20664 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=20664 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=20664 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=20664 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=20664 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff802cc48000
+[*] mm leaked=ffffff8825c90c00 base=ffffff8825c90000 object_index=3
+[*] S928 bank bucket=3 lock=0x1aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6723 base=ffffff8825c90000
+[*] app fops slide route parent=ffffff8825c91180 target=ffffff802a41c200 lock=ffffff8825c90c20 delay=70000
+[+] slide child context route=pselect pid=29607 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=20664 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=20664 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=18/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=19/30 pid=29630 delay=50000 p0_offset=0x40000
+[+] startup context pid=29630 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=29630 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=29630 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=29630 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=29630 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff89e92a0000
+[*] mm leaked=ffffff8a6e49dc00 base=ffffff8a6e498000 object_index=23
+[*] S928 bank bucket=23 lock=0x6aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=7445 base=ffffff8a6e498000
+[*] app fops slide route parent=ffffff8a6e499180 target=ffffff802a41c200 lock=ffffff8a6e49dc20 delay=70000
+[+] slide child context route=pselect pid=11376 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=29630 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=29630 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=19/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=20/30 pid=11895 delay=50000 p0_offset=0x40000
+[+] startup context pid=11895 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=11895 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=11895 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=11895 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=11895 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff802b810000
+[*] mm leaked=ffffff893e2acc00 base=ffffff893e2a8000 object_index=19
+[*] S928 bank bucket=19 lock=0x5aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=4705 base=ffffff893e2a8000
+[*] app fops slide route parent=ffffff893e2a9180 target=ffffff802a41c200 lock=ffffff893e2acc20 delay=70000
+[+] slide child context route=pselect pid=22278 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=11895 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=11895 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=20/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=21/30 pid=22299 delay=50000 p0_offset=0x40000
+[+] startup context pid=22299 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=22299 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=22299 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=22299 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=22299 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff89fd980000
+[*] mm leaked=ffffff88200ffc00 base=ffffff88200f8000 object_index=31
+[-] S928 lock bucket rejected=31 max=27 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=9081 base=0000000000000000
+[-] prepare_kernel_page retry 1/2
+[*] mm leaked=ffffff89c67f7400 base=ffffff89c67f0000 object_index=29
+[-] S928 lock bucket rejected=29 max=27 mode=0
+[*] kernel page prepare mode=0 attempt=2/2 elapsed_ms=5564 base=0000000000000000
+[-] prepare_kernel_page retry 2/2
+[-] prepare_kernel_page did not find usable nonzero source pointers
+[-] exploit attempt=21/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=22/30 pid=7438 delay=50000 p0_offset=0x40000
+[+] startup context pid=7438 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=7438 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=7438 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=7438 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=7438 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8824860000
+[*] mm leaked=ffffff802dab4c00 base=ffffff802dab0000 object_index=19
+[*] S928 bank bucket=19 lock=0x5aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=5052 base=ffffff802dab0000
+[*] app fops slide route parent=ffffff802dab1180 target=ffffff802a41c200 lock=ffffff802dab4c20 delay=70000
+[+] slide child context route=pselect pid=19316 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=7438 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=7438 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=22/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=23/30 pid=19324 delay=50000 p0_offset=0x40000
+[+] startup context pid=19324 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=19324 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=19324 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=19324 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=19324 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8a20d28000
+[*] mm leaked=ffffff882a1d9400 base=ffffff882a1d8000 object_index=5
+[*] S928 bank bucket=5 lock=0x22a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=7884 base=ffffff882a1d8000
+[*] app fops slide route parent=ffffff882a1d9180 target=ffffff802a41c200 lock=ffffff882a1d9420 delay=70000
+[+] slide child context route=pselect pid=28177 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=19324 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=19324 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=23/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=24/30 pid=28183 delay=50000 p0_offset=0x40000
+[+] startup context pid=28183 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=28183 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=28183 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=28183 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=28183 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff891f278000
+[*] mm leaked=ffffff880d083400 base=ffffff880d080000 object_index=13
+[*] S928 bank bucket=13 lock=0x42a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=7400 base=ffffff880d080000
+[*] app fops slide route parent=ffffff880d081180 target=ffffff802a41c200 lock=ffffff880d083420 delay=70000
+[+] slide child context route=pselect pid=8093 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=28183 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=28183 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=24/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=25/30 pid=8099 delay=50000 p0_offset=0x40000
+[+] startup context pid=8099 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=8099 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=8099 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=8099 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=8099 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8039110000
+[*] mm leaked=ffffff803e34f400 base=ffffff803e348000 object_index=29
+[-] S928 lock bucket rejected=29 max=27 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=7901 base=0000000000000000
+[-] prepare_kernel_page retry 1/2
+[*] mm leaked=ffffff882d791400 base=ffffff882d790000 object_index=5
+[*] S928 bank bucket=5 lock=0x22a0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=2/2 elapsed_ms=4360 base=ffffff882d790000
+[*] app fops slide route parent=ffffff882d791180 target=ffffff802a41c200 lock=ffffff882d791420 delay=70000
+[+] slide child context route=pselect pid=25066 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=8099 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=8099 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=25/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=26/30 pid=25072 delay=50000 p0_offset=0x40000
+[+] startup context pid=25072 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=25072 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=25072 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=25072 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=25072 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff80307d0000
+[*] mm leaked=ffffff88b4119c00 base=ffffff88b4118000 object_index=7
+[*] S928 bank bucket=7 lock=0x2aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=8098 base=ffffff88b4118000
+[*] app fops slide route parent=ffffff88b4119180 target=ffffff802a41c200 lock=ffffff88b4119c20 delay=70000
+[+] slide child context route=pselect pid=2244 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=25072 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=25072 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=26/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=27/30 pid=2266 delay=50000 p0_offset=0x40000
+[+] startup context pid=2266 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=2266 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=2266 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=2266 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=2266 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8810a38000
+[*] mm leaked=ffffff803902ac00 base=ffffff8039028000 object_index=11
+[*] S928 bank bucket=11 lock=0x3aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=8478 base=ffffff8039028000
+[*] app fops slide route parent=ffffff8039029180 target=ffffff802a41c200 lock=ffffff803902ac20 delay=70000
+[+] slide child context route=pselect pid=15641 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=2266 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=2266 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=27/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=28/30 pid=15646 delay=50000 p0_offset=0x40000
+[+] startup context pid=15646 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=15646 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=15646 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=15646 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=15646 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8931260000
+[*] mm leaked=ffffff89e4fdbc00 base=ffffff89e4fd8000 object_index=15
+[*] S928 bank bucket=15 lock=0x4aa0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6665 base=ffffff89e4fd8000
+[*] app fops slide route parent=ffffff89e4fd9180 target=ffffff802a41c200 lock=ffffff89e4fdbc20 delay=70000
+[+] slide child context route=pselect pid=25266 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=15646 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=15646 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=28/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=29/30 pid=25272 delay=50000 p0_offset=0x40000
+[+] startup context pid=25272 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=25272 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=25272 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=25272 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=25272 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff881e100000
+[*] mm leaked=ffffff804ae31000 base=ffffff804ae30000 object_index=4
+[*] S928 bank bucket=4 lock=0x1ea0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6981 base=ffffff804ae30000
+[*] app fops slide route parent=ffffff804ae31180 target=ffffff802a41c200 lock=ffffff804ae31020 delay=70000
+[+] slide child context route=pselect pid=2584 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=25272 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=25272 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=29/30 failed status=1
+[*] safe retry quiet delay seconds=5
+[+] exploit attempt=30/30 pid=2588 delay=50000 p0_offset=0x40000
+[+] startup context pid=2588 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[+] startup limits pid=2588 NoNewPrivs=0 Seccomp=0 Seccomp_filters=0
+[+] build config pid=2588 label=e3q-S928BXXU6EZIF-app-physical-p0-oracle slide=pselect main=pselect
+[+] p0 profile pid=2588 phys_offset=0000000080000000 kernel_phys_load=00000000a8000000 delta=0000000028000000 slide_logger=ffffff80296ba45d bootid_data=ffffff802a396a98 init_task=ffffff802a26f6c0 root_tg=ffffff802a46dd80 sysctl_bootid=ffffff802a625768
+[*] slide forced p0 offset=00040000
+[+] slide-kaslr-ok source=forced pid=2588 base=ffffffc008040000 slide=0000000000040000
+[*] fresh physrw pipe page=ffffff8040cf0000
+[*] mm leaked=ffffff881b49c000 base=ffffff881b498000 object_index=16
+[*] S928 bank bucket=16 lock=0x4ea0 task=0x1000 mode=0
+[*] mm target-neighbor slab queued for late drain
+[*] mm late cpu-partial drain triggers=32
+[*] sk_buff reclaim sends=16/16 mode=0
+[*] kernel page prepare mode=0 attempt=1/2 elapsed_ms=6504 base=ffffff881b498000
+[*] app fops slide route parent=ffffff881b499180 target=ffffff802a41c200 lock=ffffff881b49c020 delay=70000
+[+] slide child context route=pselect pid=15808 uid=2000 euid=2000 gid=2000 egid=2000 attr=u:r:shell:s0 enforce=1
+[*] app fops slide attempt=1/1 triggered=0 verified=0 step=0 errno=0
+[+] pipe-physrw-summary pid=2588 done=0 root=0 kaslr=1 base=ffffffc008040000 slide=0000000000040000
+[+] pipe physrw pid=2588 done=0 root=0 kaslr=1 read_ok=0 write_ok=0 rw64=0/0 uid=4294967295->4294967295
+[-] exploit attempt=30/30 failed status=1
+[!] exploit failed after 30 independent attempts
+⚠ 载荷未给出结论就被终止：exit=255（疑似信号 127）
+◆ 这次没拿到 exploit 结论，内核侧状态可能已脏（P0 oracle / 管道页）。建议重启后再试：重启能一并清掉页缓存污染与残留状态，成功率也最高。
+✗ 失败: exploit 未完成（可能需要多试几次 / 重启后再试，概率性成功）
+◆ 已唤醒屏幕
