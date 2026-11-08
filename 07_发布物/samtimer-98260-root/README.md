@@ -164,3 +164,33 @@ $ getenforce                          # Enforcing
 - 这解释了实测现象：98260 第一次常 park、杀后台重开第二次成功；之后同开机再跑就容易崩
 
 一句话：**43499 的 UAF 可以"用完就走"，98260 的 UAF 必须"供着不能碰"**。
+
+## 0x0B 安全拆除（safe unlink）实验 —— 2026-11-08
+
+目标：让 parked 进程即使被软重启/被杀，也不再导致硬重启。
+
+做法（`timer_samtimer.c` 实验分支，app commit `1afab49`）：
+1. `hold_victim()` 记录每个"僵尸被保留"的 victim 的 `k_itimer` VA（原来只 `g_held++` 计数）
+2. `park_forever()` 睡死前调用 `safe_unlink_held()`：用 exploit 自己的 physrw，
+   读 `k_itimer.it_signal` → victim `signal_struct`，把 3 个 CPU-clock base 的
+   `timerqueue_head`（rb_root + rb_leftmost，16B）清零
+3. 这样 victim 被 init 接手 reap 时，`cleanup_posix_cputimers()` 遍历的是空树，
+   不会对已释放页上的 stale 节点二次摘链
+
+偏移（`btf_offsets_ezif.py` 从 EZIF raw kernel BTF 提取，已 bake 进代码）：
+- `k_itimer.it_signal` = 0x60
+- `signal_struct.posix_cputimers` = 0x120
+- `posix_cputimer_base` stride = 0x18，`tqhead` = +0x8（`timerqueue_head` 0x10: rb_node@0 + rb_leftmost@8）
+- 三个树根绝对偏移：sig + 0x128 / 0x140 / 0x158
+
+首轮真机（SM-S9280 EZIF，2026-11-08）：
+- 成功路径：module live 5s，plant 全部 `reaped=1` → 没有 held victim →
+  `safe_unlink_held()` 直接返回（run.log 无 safe-unlink 行）
+- 随后 `stop; start` 软重启：system_server 重启（age 24s），**kernel uptime 连续、模块保留、
+  libtimer 存活、未硬重启**
+- `svc power reboot userspace` 在本机不支持（"device doesn't support it"），
+  无法用该命令模拟 RescueParty warm reboot；但历史证据显示本机的 warm reboot 最终会
+  变成整机重启
+
+待验证：**失败路径**（有 held zombie 的 park）——需要一次 plant 失败才会真正走到
+`safe_unlink_held()` 的写逻辑，然后软重启观察是否还会硬重启。
